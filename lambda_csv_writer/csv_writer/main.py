@@ -6,13 +6,11 @@ from concurrent.futures import ThreadPoolExecutor, wait
 try:
     from .tcgplayersdk import TCGPlayerSDK
     from .csv import write_json, write_csv
-    from .index import write_index
     from .shorten import shorten
 except ImportError:
     from tcgplayersdk import TCGPlayerSDK
     write_json = lambda *args: None
     write_csv = lambda *args: None
-    write_index = lambda *args: None
     from shorten import shorten
 
 def flattenExtendedData(product):
@@ -64,7 +62,7 @@ def process_group(group_id, safe_group_name, bucket_name, category_id, tcgplayer
     write_csv(bucket_name, f'{category_id}/{group_id}/{safe_group_name}ProductsAndPrices.csv', fieldnames, products)
 
 
-def process_category(category_name, category_id, safe_category_name, bucket_name, tcgplayer, written_data, executor):
+def process_category(category_name, category_id, safe_category_name, bucket_name, tcgplayer, executor):
     # if category['name'] != 'Flesh & Blood TCG':
         #     continue
 
@@ -82,7 +80,7 @@ def process_category(category_name, category_id, safe_category_name, bucket_name
 
     for group in groups:
         group_id = group['groupId']
-        safe_group_name = group['name'].replace('&', 'And').replace(' ', '').replace(':', '').replace('.', '')
+        safe_group_name = group['name'].replace('&', 'And').replace(' ', '').replace(':', '').replace('.', '').replace('/', '-')
 
         # Apparently you can nest these
         executor.submit(
@@ -93,14 +91,6 @@ def process_category(category_name, category_id, safe_category_name, bucket_name
             category_id, 
             tcgplayer,
         )
-
-        # assume the data will be written I guess?!?
-        written_data[category_id]['groups'][group_id] = {
-            'name': group['name'],
-            'products_json': f'{category_id}/{group_id}/products',
-            'prices_json': f'{category_id}/{group_id}/prices',
-            'combined_csv': f'{category_id}/{group_id}/{safe_group_name}ProductsAndPrices.csv',
-        }
 
 
 def lambda_handler(event, context):
@@ -114,8 +104,6 @@ def lambda_handler(event, context):
 
 def main(bucket_name, public_key, private_key):
     start = time.time()
-    
-    written_data = {}
 
     # Initialize TCGPlayerSDK
     tcgplayer = TCGPlayerSDK(public_key, private_key)
@@ -136,21 +124,13 @@ def main(bucket_name, public_key, private_key):
         category_id = category['categoryId']
         safe_category_name = category_name.replace('&', 'And').replace(' ', '')
 
-        written_data[category_id] = {
-            'name': category_name,
-            'groups_json': f'{category_id}/groups',
-            'groups_csv': f'{category_id}/{safe_category_name}Groups.csv',
-            'groups': {},
-        }
-
         f = executor.submit(
             process_category, 
             category_name, 
             category_id, 
             safe_category_name, 
             bucket_name, 
-            tcgplayer, 
-            written_data, 
+            tcgplayer,
             executor,
         )
 
@@ -160,17 +140,11 @@ def main(bucket_name, public_key, private_key):
     wait(futures)
     executor.shutdown(wait=True)
 
-    write_index(bucket_name, written_data)
-
     delta = time.time() - start
-
-    count = 0
-    for category in written_data.values():
-        count += len(category['groups']) + 1
 
     return {
         'statusCode': 200,
-        'data': f'{int(delta // 60)} minutes, {int(delta % 60)} seconds {count} {written_data}'
+        'data': f'{int(delta // 60)} minutes, {int(delta % 60)} seconds'
     }
 
 if __name__ == '__main__':

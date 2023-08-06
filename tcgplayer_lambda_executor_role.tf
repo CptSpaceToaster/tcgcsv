@@ -12,8 +12,19 @@ data aws_iam_policy_document lambda_assume_role {
 data aws_iam_policy_document lambda_s3 {
   statement {
     actions = [
+        "s3:ListBucket"
+    ]
+
+    resources = [
+      "${aws_s3_bucket.tcgplayer_json_csv_vault.arn}"
+    ]
+  }
+  
+  statement {
+    actions = [
       "s3:PutObject",
-      "s3:PutObjectAcl"
+      "s3:PutObjectAcl",
+      "s3:GetObject"
     ]
 
     resources = [

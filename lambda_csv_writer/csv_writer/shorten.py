@@ -1,6 +1,6 @@
 import os
 
-shorten_url = os.getenv('SHORTEN_URL')
+shorten_domain = os.getenv('SHORTEN_DOMAIN')
 
 hesh_chars = '02356789bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ-_'
 BASE = len(hesh_chars)
@@ -14,4 +14,4 @@ def b64ish(i: int) -> str:
     return ''.join(b64)
 
 def shorten(i: int):
-    return f'{shorten_url}/{b64ish(i)}'
+    return f'{shorten_domain}/{b64ish(i)}'
