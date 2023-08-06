@@ -40,17 +40,16 @@ template_start = '''<!doctype html>
   </head>
   <body>
     <header>
-      <h1>TCGPlayer JSON Dumps</h1>
-      <p>Ahoy There! I'm CptSpaceToaster! This website is a personal project of mine that vendors some information from TCGPlayer's API into JSON and CSV text dumps. Content <i>should</i> be updated daily, but things are VERY ramshackle at the moment. I would eventually like to open source some things here, and the roadmap has a lot to do! The JSON text dumps are as raw as they can be straight from TCGPlayer. The CSV's that I've put together DO have my personal affiliate links in there.</p>
-      <ol>
-        <li><s>Getting a discord up and running</s></li>
-        <li>Write more of a project description & <s>link the discord</s></li>
-        <li>Some more web development <s>(odd/even lines in the blocks of sets)</s></li>
-        <li>Threading the lambda writer</li>
-        <li>Some more categories</li>
-        <li>All categories</li>
-      </ol>
-      <p>You can join this <a href="https://discord.gg/bydv2BNV25">discord</a> for updates and contact! </p>
+      <h1>TCGPlayer CSV & JSON Dumps</h1>
+      <p>Ahoy There! I'm CptSpaceToaster!</p>
+      <p>This website is a personal project of mine that exposes some information from TCGPlayer's API. The TCGPlayer API responses used to generate the content on this website are cached as json dumps and made available. The resulting tree of categories, groups, products, and prices is walked for some of the popular categories so I could share some data from TCGPlayer's API to folks who want it but can't get API access. The JSON text dumps are straight from TCGPlayer. The CSV's that I've put together DO have my personal affiliate links in there.</p>
+      <p>All content <i>should</i> be updated daily, but things are VERY ramshackle at the moment. The current roadmap has a lot to do!</p>
+      <ul>
+        <li>I would like to get all categories at some point, but I'm running up against a lambda timeout even after some threading shenanigans</li>
+      </ul>
+      <p>You can join this <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25">discord</a> to contact me, get updates, and talk about what would be cool to have next!</p>
+      <p>You can see my terraform learnings, AWS infrastructure, and open source mess on <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv">Github</a></p>
+      <p>If you would like to support this project, please consider using my <a href="https://cpt.tcgcsv.com">affiliate link</a> to keep the lights on</p>
       <br>
     </header>
     <main>
@@ -78,7 +77,6 @@ def write_content_in_descriptor(fout, written_data):
     fout.write(f'      </div>\n')
     
     for category_id, category in written_data['categories'].items():
-        # category_name = written_data['categories_LUT'].get(category_id, f'categoryName({category_id})')
         category_name = [c for c in written_data['categories_results'] if c['categoryId'] == category_id][0]['name']
 
         fout.write(f'      <details>\n')
@@ -96,7 +94,6 @@ def write_content_in_descriptor(fout, written_data):
         
         even = True
         for group_id, group in category['groups'].items():
-            # group_name = category['groups_LUT'].get(group_id, f'groupName({group_id})')
             group_name = [g for g in category['groups_results'] if g['groupId'] == group_id][0]['name']
 
             class_param = ' class="e"' if even else ''
@@ -236,5 +233,54 @@ def lambda_handler(event, context):
     
     return {
         'statusCode': 200,
-        'data': f'{len(written_data)}'
+        'data': f'{len(written_data["categories"])}'
     }
+
+if __name__ == '__main__':
+    written_data = {
+        'categories_csv': 'categories.csv',
+        'categories_json': 'categories',
+        'categories_results': [{
+            'categoryId': 1,
+            'name': 'Magic',
+        }, {
+            'categoryId': 3,
+            'name': 'Pokemon',
+        }],
+        'categories': {
+            1: {
+                'groups_json': '1/groups',
+                'groups_csv': '1/MagicGroups.csv',
+                'groups_results': [{
+                    'groupId': 1,
+                    'name': '10th Edition',
+                }],
+                'groups': {
+                    1: {
+                        'products_json': '1/1/products',
+                        'prices_json': '1/1/prices',
+                        'combined_csv': '1/1/10thEditionProductsAndPrices',
+                    }
+                },
+            },
+            3: {
+                'groups_json': '3/groups',
+                'groups_csv': '3/PokemonGroups.csv',
+                'groups_results': [{
+                    'groupId': 604,
+                    'name': 'Base Set',
+                }],
+                'groups': {
+                    604: {
+                        'products_json': '3/604/products',
+                        'prices_json': '3/604/prices',
+                        'combined_csv': '3/604/BaseSetProductsAndPrices',
+                    }
+                },
+            },
+        },
+    }
+    with open('index.html', 'w') as fout:
+        write_content_in_descriptor(fout, written_data)
+
+    os.system("open index.html")
