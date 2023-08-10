@@ -14,11 +14,14 @@ template_start = '''<!doctype html>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="TCGPlayer CSV & JSON Dumps"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="http://tcgcsv.com"/>
+    <meta property="og:description" content="TCGPlayer category, group, and product information updated daily"/>
+    <meta name="theme-color" content="#663399">
     <title>TCGPlayer CSV & JSON Dumps</title>
     <style>
-      .content-grid {
-        display: grid; grid-template-columns: 1fr 1fr; align-items: center; margin-bottom: 12px;
-      }
+      .content-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; margin-bottom: 12px; }
       .links { margin-bottom: 2px; }
       .e { background-color: #EEE; }
       .b { border-bottom: 1px solid #000; }
