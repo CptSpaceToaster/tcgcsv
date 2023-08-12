@@ -1,5 +1,6 @@
 import os
 import json
+import time
 from collections import OrderedDict
 
 try:
@@ -14,12 +15,16 @@ template_start = '''<!doctype html>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta property="og:title" content="TCGPlayer CSV & JSON Dumps"/>
+    <meta property="og:title" content="TCGCSV"/>
     <meta property="og:type" content="website"/>
     <meta property="og:url" content="http://tcgcsv.com"/>
     <meta property="og:description" content="TCGPlayer category, group, and product information updated daily"/>
     <meta name="theme-color" content="#663399">
-    <title>TCGPlayer CSV & JSON Dumps</title>
+    <title>TCGCSV</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <style>
       .content-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; margin-bottom: 12px; }
       .links { margin-bottom: 2px; }
@@ -63,13 +68,13 @@ template_end = '''    </main>
 </html>
 '''
 
-def write_index(bucket_name, written_data, content_type='text/html'):
+def write_index(bucket_name, shorten_domain, written_data, content_type='text/html'):
     params = {'client_kwargs': {'S3.Client.create_multipart_upload': {'ContentType': content_type}}}
     with smart_open.open(f's3://{bucket_name}/index.html', 'w', transport_params=params) as fout:
-        write_content_in_descriptor(fout, written_data)
+        write_content_in_descriptor(fout, shorten_domain, written_data)
 
 
-def write_content_in_descriptor(fout, written_data):
+def write_content_in_descriptor(fout, shorten_domain, written_data):
     fout.write(template_start)
     fout.write(f'      <div class="content-grid">\n')
     fout.write(f'        <span>All Categories</span>\n')
@@ -144,7 +149,7 @@ def process_objects(objs, bucket_name):
         'categories_results': [],
     }
 
-    ignored_files = ['index.html']
+    ignored_files = ['index.html', 'manifest.webmanifest', 'apple-touch-icon.png', 'favicon.ico', 'icon-192.png', 'icon-512.png', 'icon.svg']
 
     for obj in objs:
         name = obj['Key']
@@ -221,9 +226,11 @@ def process_objects(objs, bucket_name):
 def lambda_handler(event, context):
     # Env vars
     bucket_name = os.getenv('BUCKET_NAME')
+    distribution_id = os.getenv('DISTRIBUTION_ID')
     shorten_domain = os.getenv('SHORTEN_DOMAIN')
 
     s3 = boto3.client('s3')
+    cf = boto3.client('cloudfront')
 
     # Get all objects
     all_objects = get_all_objects_in_bucket(s3, bucket_name)
@@ -232,7 +239,18 @@ def lambda_handler(event, context):
     written_data = process_objects(all_objects['Contents'], bucket_name)
     
     # Write out
-    write_index(bucket_name, written_data)
+    write_index(bucket_name, shorten_domain, written_data)
+
+    cf.create_invalidation(
+        DistributionId=distribution_id,
+        InvalidationBatch={
+            'Paths': {
+                'Quantity': 1,
+                'Items': ['/*']
+            },
+            'CallerReference': str(time.time()).replace(".", "")
+        }
+    )
     
     return {
         'statusCode': 200,
@@ -284,6 +302,6 @@ if __name__ == '__main__':
         },
     }
     with open('index.html', 'w') as fout:
-        write_content_in_descriptor(fout, written_data)
+        write_content_in_descriptor(fout, shorten_domain, written_data)
 
     os.system("open index.html")

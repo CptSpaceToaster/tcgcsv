@@ -31,6 +31,16 @@ data aws_iam_policy_document lambda_s3 {
       "${aws_s3_bucket.tcgplayer_json_csv_vault.arn}/*"
     ]
   }
+
+  statement {
+    actions = [
+      "cloudfront:CreateInvalidation"
+    ]
+
+    resources = [
+      "${aws_cloudfront_distribution.s3_distribution.arn}"
+    ]
+  }
 }
 
 data aws_iam_policy_document lambda_logs {
