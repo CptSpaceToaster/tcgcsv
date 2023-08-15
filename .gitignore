@@ -36,7 +36,7 @@ terraform.rc
 
 # Project specific
 */bundle.zip
-lambda_support_layer/python/*
+lambda_support_layer/python
 lambda_support_layer/layer.zip
 output.txt
 index.html

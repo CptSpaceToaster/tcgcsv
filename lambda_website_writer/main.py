@@ -57,7 +57,7 @@ template_start = '''<!doctype html>
       </ul>
       <p>You can join this <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25">discord</a> to contact me, get updates, and talk about what would be cool to have next!</p>
       <p>You can see my terraform learnings, AWS infrastructure, and open source mess on <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv">Github</a></p>
-      <p>If you would like to support this project, please consider using my <a href="https://cpt.tcgcsv.com">affiliate link</a> to keep the lights on</p>
+      <p>If you would like to support this project, please consider using my <a href="https://cpt.tcgcsv.com">affiliate link</a> to help keep the lights on</p>
       <br>
     </header>
     <main>
@@ -226,8 +226,8 @@ def process_objects(objs, bucket_name):
 def lambda_handler(event, context):
     # Env vars
     bucket_name = os.getenv('BUCKET_NAME')
-    distribution_id = os.getenv('DISTRIBUTION_ID')
     shorten_domain = os.getenv('SHORTEN_DOMAIN')
+    distribution_id = os.getenv('DISTRIBUTION_ID')
 
     s3 = boto3.client('s3')
     cf = boto3.client('cloudfront')

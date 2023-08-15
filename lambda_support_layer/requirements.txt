@@ -1,0 +1,6 @@
+certifi==2023.7.22
+charset-normalizer==3.2.0
+idna==3.4
+requests==2.29.0
+smart-open==6.3.0
+urllib3==1.26.16

@@ -63,9 +63,6 @@ def process_group(group_id, safe_group_name, bucket_name, category_id, tcgplayer
 
 
 def process_category(category_name, category_id, safe_category_name, bucket_name, tcgplayer, executor):
-    # if category['name'] != 'Flesh & Blood TCG':
-        #     continue
-
     groups_response = tcgplayer.get_groups(category_id)
     write_json(bucket_name, f'{category_id}/groups', groups_response)
 
@@ -75,7 +72,7 @@ def process_category(category_name, category_id, safe_category_name, bucket_name
 
     write_csv(bucket_name, f'{category_id}/{safe_category_name}Groups.csv', groups[0].keys(), groups)
 
-    if category_name not in ['Magic', 'YuGiOh', 'Pokemon', 'Flesh & Blood TCG']:
+    if category_name not in ['Magic', 'YuGiOh', 'Pokemon', 'Cardfight Vanguard', 'Flesh & Blood TCG']:
         return
 
     for group in groups:
