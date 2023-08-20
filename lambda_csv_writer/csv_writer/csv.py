@@ -2,10 +2,7 @@ import io
 import csv
 import json
 
-try:
-    import smart_open
-except ImportError:
-    pass
+import smart_open
 
 def write_json(bucket_name, filename, results, content_type='text/json'):
     params = {'client_kwargs': {'S3.Client.create_multipart_upload': {'ContentType': content_type}}}

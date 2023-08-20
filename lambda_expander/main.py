@@ -1,6 +1,6 @@
 import os
 
-affiliate_code = os.getenv('AFFILIATE_CODE')
+affiliate_code = os.getenv('TCGCSV_AFFILIATE_CODE')
 
 hesh_chars = '02356789bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ-_'
 BASE = len(hesh_chars)

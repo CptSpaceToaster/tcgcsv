@@ -3,15 +3,9 @@ import time
 from concurrent.futures import ThreadPoolExecutor, wait
 
 # Hacks to run locally if needed for testing
-try:
-    from .tcgplayersdk import TCGPlayerSDK
-    from .csv import write_json, write_csv
-    from .shorten import shorten
-except ImportError:
-    from tcgplayersdk import TCGPlayerSDK
-    write_json = lambda *args: None
-    write_csv = lambda *args: None
-    from shorten import shorten
+from .tcgplayersdk import TCGPlayerSDK
+from .csv import write_json, write_csv
+from .shorten import shorten
 
 def flattenExtendedData(product):
     # This modifies the results dictionary in-place
@@ -49,7 +43,7 @@ def process_group(group_id, safe_group_name, bucket_name, category_id, tcgplayer
         injectPricesIntoProducts(product, prices)
         flattenExtendedData(product)
 
-        # Filter out keys
+        # Filter out any keys
         for key in ['presaleInfo']:
             product.pop(key, None)
 
@@ -92,7 +86,7 @@ def process_category(category_name, category_id, safe_category_name, bucket_name
 
 def lambda_handler(event, context):
     # Env vars
-    bucket_name = os.getenv('BUCKET_NAME')
+    bucket_name = os.getenv('TCGCSV_BUCKET_NAME')
     public_key = os.getenv('TCGPLAYER_PUBLIC_KEY')
     private_key = os.getenv('TCGPLAYER_PRIVATE_KEY')
 

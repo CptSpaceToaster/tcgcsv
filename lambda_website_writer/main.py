@@ -3,11 +3,8 @@ import json
 import time
 from collections import OrderedDict
 
-try:
-    import boto3
-    import smart_open
-except ImportError:
-    pass
+import boto3
+import smart_open
 
 
 template_start = '''<!doctype html>
@@ -225,9 +222,9 @@ def process_objects(objs, bucket_name):
 
 def lambda_handler(event, context):
     # Env vars
-    bucket_name = os.getenv('BUCKET_NAME')
-    shorten_domain = os.getenv('SHORTEN_DOMAIN')
-    distribution_id = os.getenv('DISTRIBUTION_ID')
+    bucket_name = os.getenv('TCGCSV_BUCKET_NAME')
+    shorten_domain = os.getenv('TCGCSV_SHORTEN_DOMAIN')
+    distribution_id = os.getenv('TCGCSV_DISTRIBUTION_ID')
 
     s3 = boto3.client('s3')
     cf = boto3.client('cloudfront')
@@ -257,7 +254,10 @@ def lambda_handler(event, context):
         'data': f'{len(written_data["categories"])}'
     }
 
-if __name__ == '__main__':
+
+def test_website_generation_locally():
+    shorten_domain = os.getenv('TCGCSV_SHORTEN_DOMAIN')
+
     written_data = {
         'categories_csv': 'categories.csv',
         'categories_json': 'categories',
@@ -301,7 +301,17 @@ if __name__ == '__main__':
             },
         },
     }
+
     with open('index.html', 'w') as fout:
         write_content_in_descriptor(fout, shorten_domain, written_data)
 
-    os.system("open index.html")
+    os.system("open index.html") 
+
+
+if __name__ == '__main__':
+    # Do it big
+    # os.environ['AWS_SHARED_CREDENTIALS_FILE'] = '~/.aws/personal_credentials'
+    # print(lambda_handler(None, None))
+
+    # Do it small
+    test_website_generation_locally()

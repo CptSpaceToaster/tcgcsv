@@ -40,3 +40,5 @@ lambda_support_layer/python
 lambda_support_layer/layer.zip
 output.txt
 index.html
+
+.venv/

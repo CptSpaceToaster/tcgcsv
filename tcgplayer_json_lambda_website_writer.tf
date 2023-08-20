@@ -12,9 +12,9 @@ resource "aws_lambda_function" "tcgplayer_json_lambda_website_writer" {
 
   environment {
     variables = {
-      BUCKET_NAME = aws_s3_bucket.tcgplayer_json_csv_vault.bucket
-      SHORTEN_DOMAIN = "https://${aws_apigatewayv2_domain_name.cpt.domain_name}"
-      DISTRIBUTION_ID = aws_cloudfront_distribution.s3_distribution.id
+      TCGCSV_BUCKET_NAME = aws_s3_bucket.tcgplayer_json_csv_vault.bucket
+      TCGCSV_SHORTEN_DOMAIN = "https://${aws_apigatewayv2_domain_name.cpt.domain_name}"
+      TCGCSV_DISTRIBUTION_ID = aws_cloudfront_distribution.s3_distribution.id
     }
   }
 }

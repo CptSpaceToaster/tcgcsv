@@ -1,6 +1,6 @@
 import os
 
-shorten_domain = os.getenv('SHORTEN_DOMAIN')
+shorten_domain = os.getenv('TCGCSV_SHORTEN_DOMAIN')
 
 hesh_chars = '02356789bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ-_'
 BASE = len(hesh_chars)
