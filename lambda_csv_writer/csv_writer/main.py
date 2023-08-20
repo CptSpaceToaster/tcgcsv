@@ -3,9 +3,14 @@ import time
 from concurrent.futures import ThreadPoolExecutor, wait
 
 # Hacks to run locally if needed for testing
-from .tcgplayersdk import TCGPlayerSDK
-from .csv import write_json, write_csv
-from .shorten import shorten
+try:
+    from .tcgplayersdk import TCGPlayerSDK
+    from .csv_utils import write_json, write_csv
+    from .shorten import shorten
+except ImportError:
+    from tcgplayersdk import TCGPlayerSDK
+    from csv_utils import write_json, write_csv
+    from shorten import shorten
 
 def flattenExtendedData(product):
     # This modifies the results dictionary in-place
@@ -66,7 +71,8 @@ def process_category(category_name, category_id, safe_category_name, bucket_name
 
     write_csv(bucket_name, f'{category_id}/{safe_category_name}Groups.csv', groups[0].keys(), groups)
 
-    if category_name not in ['Magic', 'YuGiOh', 'Pokemon', 'Cardfight Vanguard', 'Flesh & Blood TCG']:
+    # if category_name not in ['Magic', 'YuGiOh', 'Pokemon', 'Cardfight Vanguard', 'Flesh & Blood TCG']:
+    if category_name not in ['Flesh & Blood TCG']:
         return
 
     for group in groups:
@@ -82,15 +88,6 @@ def process_category(category_name, category_id, safe_category_name, bucket_name
             category_id, 
             tcgplayer,
         )
-
-
-def lambda_handler(event, context):
-    # Env vars
-    bucket_name = os.getenv('TCGCSV_BUCKET_NAME')
-    public_key = os.getenv('TCGPLAYER_PUBLIC_KEY')
-    private_key = os.getenv('TCGPLAYER_PRIVATE_KEY')
-
-    return main(bucket_name, public_key, private_key)
 
 
 def main(bucket_name, public_key, private_key):
@@ -138,7 +135,33 @@ def main(bucket_name, public_key, private_key):
         'data': f'{int(delta // 60)} minutes, {int(delta % 60)} seconds'
     }
 
+
+def lambda_handler(event, context):
+    # Env vars
+    bucket_name = os.getenv('TCGCSV_BUCKET_NAME')
+    public_key = os.getenv('TCGPLAYER_PUBLIC_KEY')
+    private_key = os.getenv('TCGPLAYER_PRIVATE_KEY')
+
+    return main(bucket_name, public_key, private_key)
+
+
 if __name__ == '__main__':
-    response = main('', os.getenv('TF_VAR_TCGPLAYER_PUBLIC_KEY'), os.getenv('TF_VAR_TCGPLAYER_PRIVATE_KEY'))
+    import time
+
+    os.environ['AWS_SHARED_CREDENTIALS_FILE'] = '~/.aws/personal_credentials'
+
+    start = time.time()
+
+    bucket_name = os.getenv('TCGCSV_BUCKET_NAME')
+    public_key = os.getenv('TF_VAR_TCGPLAYER_PUBLIC_KEY')
+    private_key = os.getenv('TF_VAR_TCGPLAYER_PRIVATE_KEY')
+
+    response = main(bucket_name, public_key, private_key)
+
+    finish = time.time()
+    diff = finish - start
+
+    print(f'{int(diff // 60)} minutes {int(diff % 60)} seconds')
+
     with open('local.txt', 'w') as f:
         f.write(str(response['data']))
