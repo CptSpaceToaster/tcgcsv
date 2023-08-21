@@ -1,4 +1,6 @@
-import requests
+import json
+
+import aiohttp
 
 try:
     from .exceptions import TCGPlayerSDKException
@@ -13,9 +15,11 @@ TCGPLAYER_API_URL = f'{TCGPLAYER_BASE_URL}/{TCGPLAYER_API_VERSION}'
 class TCGPlayerSDK():
     def __init__(
         self,
+        session: aiohttp.ClientSession,
         public_key: str,
         private_key: str,
     ):
+        self.session = session
         self.public_key = public_key
         self.private_key = private_key
 
@@ -23,9 +27,9 @@ class TCGPlayerSDK():
         self._token = None
 
     @property
-    def token(self):
+    async def token(self):
         if self._token is None:
-            r = requests.post(
+            r = await self.session.post(
                 f'{TCGPLAYER_API_URL}/token',
                 data={
                     'grant_type': 'client_credentials',
@@ -33,28 +37,29 @@ class TCGPlayerSDK():
                     'client_secret': self.private_key,
                 },
             )
-            self._identity = r.json()
+            self._identity = json.loads(await r.read())
             self._token = f'{self._identity["token_type"]} {self._identity["access_token"]}'
         return self._token
 
-    def _get_all_pages(self, path: str, extra_params={}):
+    async def _get_all_pages(self, path: str, extra_params={}):
         res = None
         offset = 0
         limit = 100
 
         while True:
-            r = requests.get(
+            r = await self.session.get(
                 path,
                 params={
                     **extra_params,
                     'offset': offset,
                     'limit': 100,
                 },
-                headers={'Authorization': self.token},
+                headers={'Authorization': await self.token},
             )
 
-            parsed = r.json()
-            if r.status_code != 200:
+            parsed = json.loads(await r.read())
+
+            if parsed['errors'] != []:
                 # 404 WITH CONTENT IS NOT OK
                 if parsed['errors'] == ['No products were found.']:
                     parsed = {
@@ -77,42 +82,42 @@ class TCGPlayerSDK():
 
         return res
 
-    def get_categories(self, sort_order='categoryId', sort_desc=False):
-        return self._get_all_pages(
+    async def get_categories(self, sort_order='categoryId', sort_desc=False):
+        return await self._get_all_pages(
             f'{TCGPLAYER_API_URL}/catalog/categories',
             extra_params={
                 'sortOrder': sort_order,
-                'sortDesc': sort_desc,
+                'sortDesc': str(sort_desc),
             }
         )
-    
-    def get_groups(self, category_id, sort_order='publishedOn', sort_desc=True):
-        return self._get_all_pages(
+
+    async def get_groups(self, category_id, sort_order='publishedOn', sort_desc=True):
+        return await self._get_all_pages(
             f'{TCGPLAYER_API_URL}/catalog/categories/{category_id}/groups',
             extra_params={
                 'sortOrder': sort_order,
-                'sortDesc': sort_desc,
+                'sortDesc': str(sort_desc),
             }
         )
-    
-    def get_products_for_group(self, group_id, sort_order='name', sort_desc=False, get_extended_fields=True):
-        return self._get_all_pages(
+
+    async def get_products_for_group(self, group_id, sort_order='name', sort_desc=False, get_extended_fields=True):
+        return await self._get_all_pages(
             f'{TCGPLAYER_API_URL}/catalog/products',
             extra_params={
                 'groupId': group_id,
                 'sortOrder': sort_order,
-                'sortDesc': sort_desc,
-                'getExtendedFields': get_extended_fields,
+                'sortDesc': str(sort_desc),
+                'getExtendedFields': str(get_extended_fields),
             }
         )
-    
-    def get_prices_for_group(self, group_id):
-        r = requests.get(
+
+    async def get_prices_for_group(self, group_id):
+        r = await self.session.get(
             f'{TCGPLAYER_API_URL}/pricing/group/{group_id}',
-            headers={'Authorization': self.token},
+            headers={'Authorization': await self.token},
         )
-        response = r.json()
-        if r.status_code != 200:
+        response = json.loads(await r.read())
+        if response['errors'] != []:
             # 404 WITH CONTENT IS (still) NOT OK
             if response['errors'] == ['No products were found.']:
                 response = {

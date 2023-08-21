@@ -39,7 +39,7 @@ resource "aws_lambda_function" "tcgplayer_json_lambda_csv_writer" {
 
 resource "aws_cloudwatch_event_rule" "csv_writer_lambda_event_rule" {
   name = "csv_writer_lambda_event_rule"
-  schedule_expression = "cron(0 0 * * ? *)"
+  schedule_expression = "cron(0 20 * * ? *)" // Every day at 20:00 UTC which is 4:00 PM EST
 }
 
 resource "aws_cloudwatch_event_target" "csv_writer_lambda_target" {

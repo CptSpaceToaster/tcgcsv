@@ -1,6 +1,13 @@
 import os
 import time
-from concurrent.futures import ThreadPoolExecutor, wait
+
+# TODO: Remove requests, and add asyncio and aiohttp to the lambda support layer
+import asyncio
+import aiohttp
+from aiohttp_s3_client import S3Client
+from aiohttp_s3_client.credentials import ConfigCredentials
+
+# https://blog.jonlu.ca/posts/async-python-http
 
 # Hacks to run locally if needed for testing
 try:
@@ -32,101 +39,89 @@ def overwriteURL(product):
         product['url'] = shorten(product['productId'])
 
 
-def process_group(group_id, safe_group_name, bucket_name, category_id, tcgplayer):
-    products_response = tcgplayer.get_products_for_group(group_id)
-    write_json(bucket_name, f'{category_id}/{group_id}/products', products_response)
-
-    prices_response = tcgplayer.get_prices_for_group(group_id)
-    write_json(bucket_name, f'{category_id}/{group_id}/prices', prices_response)
-
-    products = products_response['results']
-    prices = prices_response['results']
-
-    fieldnames = []
-    for product in products:
-        overwriteURL(product)
-        injectPricesIntoProducts(product, prices)
-        flattenExtendedData(product)
-
-        # Filter out any keys
-        for key in ['presaleInfo']:
-            product.pop(key, None)
-
-        # This is probably inefficient, but it should preserve some order in the CSV
-        # TODO: Profile this
-        for key in product.keys():
-            if key not in fieldnames:
-                fieldnames.append(key)
-        
-    write_csv(bucket_name, f'{category_id}/{group_id}/{safe_group_name}ProductsAndPrices.csv', fieldnames, products)
-
-
-def process_category(category_name, category_id, safe_category_name, bucket_name, tcgplayer, executor):
-    groups_response = tcgplayer.get_groups(category_id)
-    write_json(bucket_name, f'{category_id}/groups', groups_response)
-
-    groups = groups_response['results']
-    if len(groups) == 0: # Apparently there is a category without any groups
-        return
-
-    write_csv(bucket_name, f'{category_id}/{safe_category_name}Groups.csv', groups[0].keys(), groups)
-
-    # if category_name not in ['Magic', 'YuGiOh', 'Pokemon', 'Cardfight Vanguard', 'Flesh & Blood TCG']:
-    if category_name not in ['Flesh & Blood TCG']:
-        return
-
-    for group in groups:
-        group_id = group['groupId']
-        safe_group_name = group['name'].replace('&', 'And').replace(' ', '').replace(':', '').replace('.', '').replace('/', '-')
-
-        # Apparently you can nest these
-        executor.submit(
-            process_group, 
-            group_id, 
-            safe_group_name, 
-            bucket_name, 
-            category_id, 
-            tcgplayer,
-        )
-
-
-def main(bucket_name, public_key, private_key):
+async def main(bucket_name, public_key, private_key):
     start = time.time()
 
+    MAX_CONCURRENCY = 100
+
+    conn = aiohttp.TCPConnector(limit_per_host=MAX_CONCURRENCY, limit=0, ttl_dns_cache=300)
+    session = aiohttp.ClientSession(connector=conn)
+
+    # Initialize s3
+    credentials = ConfigCredentials()
+    s3_client = S3Client(
+        url=f"https://{bucket_name}.s3.us-east-1.amazonaws.com",
+        session=session,
+        credentials=credentials,
+    )
+
     # Initialize TCGPlayerSDK
-    tcgplayer = TCGPlayerSDK(public_key, private_key)
+    tcgplayer = TCGPlayerSDK(session, public_key, private_key)
 
     # Generate content
-    categories_response = tcgplayer.get_categories()
-    write_json(bucket_name, 'categories', categories_response)
-
+    categories_response = await tcgplayer.get_categories()
+    await write_json(s3_client, 'categories', categories_response)
     categories = categories_response['results']
-    write_csv(bucket_name, 'categories.csv', categories[0].keys(), categories)
+    await write_csv(s3_client, 'categories.csv', categories[0].keys(), categories)
 
-    futures = []
+    semaphore = asyncio.Semaphore(MAX_CONCURRENCY)
 
-    # Oh dear x16
-    executor = ThreadPoolExecutor(max_workers=16)
-    for category in categories:
+    category_group_pairs = []
+
+    async def process_category(category):
         category_name = category['name']
         category_id = category['categoryId']
         safe_category_name = category_name.replace('&', 'And').replace(' ', '')
+        async with semaphore:
+            groups_response = await tcgplayer.get_groups(category_id)
+            await write_json(s3_client, f'{category_id}/groups', groups_response)
 
-        f = executor.submit(
-            process_category, 
-            category_name, 
-            category_id, 
-            safe_category_name, 
-            bucket_name, 
-            tcgplayer,
-            executor,
-        )
+            groups = groups_response['results']
+            category_group_pairs.extend([(category_id, group) for group in groups])
 
-        if f is not None:
-            futures.append(f)
+            if len(groups) == 0: # Apparently there is a category without any groups
+                return
+            await write_csv(s3_client, f'{category_id}/{safe_category_name}Groups.csv', groups[0].keys(), groups)
 
-    wait(futures)
-    executor.shutdown(wait=True)
+    # TODO: Is there any way I can start the second process without blocking here like before with threads?
+    await asyncio.gather(*(process_category(category) for category in reversed(categories)))
+
+    async def process_group(category_id, group):
+        if category_id not in [1, 2, 3, 16, 62]:
+            return
+
+        group_id = group['groupId']
+        safe_group_name = group['name'].replace('&', 'And').replace(' ', '').replace(':', '').replace('.', '').replace('/', '-')
+        async with semaphore:
+            products_response = await tcgplayer.get_products_for_group(group_id)
+            await write_json(s3_client, f'{category_id}/{group_id}/products', products_response)
+            prices_response = await tcgplayer.get_prices_for_group(group_id)
+            await write_json(s3_client, f'{category_id}/{group_id}/prices', prices_response)
+
+            products = products_response['results']
+            prices = prices_response['results']
+
+            fieldnames = []
+            for product in products:
+                overwriteURL(product)
+                injectPricesIntoProducts(product, prices)
+                flattenExtendedData(product)
+
+                # Filter out any keys
+                for key in ['presaleInfo']:
+                    product.pop(key, None)
+
+                # This is probably inefficient, but it should preserve some order in the CSV
+                # TODO: Profile this
+                for key in product.keys():
+                    if key not in fieldnames:
+                        fieldnames.append(key)
+
+            await write_csv(s3_client, f'{category_id}/{group_id}/{safe_group_name}ProductsAndPrices.csv', fieldnames, products)
+
+    await asyncio.gather(*(process_group(*cgp) for cgp in category_group_pairs))
+
+    await session.close()
 
     delta = time.time() - start
 
@@ -148,7 +143,7 @@ def lambda_handler(event, context):
 if __name__ == '__main__':
     import time
 
-    os.environ['AWS_SHARED_CREDENTIALS_FILE'] = '~/.aws/personal_credentials'
+    os.environ['AWS_SHARED_CREDENTIALS_FILE'] = f'{os.path.expanduser("~")}/.aws/personal_credentials'
 
     start = time.time()
 
@@ -156,12 +151,13 @@ if __name__ == '__main__':
     public_key = os.getenv('TF_VAR_TCGPLAYER_PUBLIC_KEY')
     private_key = os.getenv('TF_VAR_TCGPLAYER_PRIVATE_KEY')
 
-    response = main(bucket_name, public_key, private_key)
+    response = asyncio.get_event_loop().run_until_complete(
+        main(bucket_name, public_key, private_key)
+    )
 
-    finish = time.time()
-    diff = finish - start
+    delta = time.time() - start
 
-    print(f'{int(diff // 60)} minutes {int(diff % 60)} seconds')
+    # print(f'{int(delta // 60)} minutes {int(delta % 60)} seconds')
 
     with open('local.txt', 'w') as f:
         f.write(str(response['data']))

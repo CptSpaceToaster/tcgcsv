@@ -1,6 +1,8 @@
 class TCGPlayerSDKException(Exception):
     def __init__(self, response):
         self.response = response
+
+        # TODO: This response doesn't have a json property
         try:
             self.error = response.json()
         except:

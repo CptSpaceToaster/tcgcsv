@@ -1,27 +1,56 @@
 import io
 import csv
 import json
+from typing import List
 
-import smart_open
+from aiohttp_s3_client import S3Client
 
-def write_json(bucket_name, filename, results, content_type='text/json'):
-    params = {'client_kwargs': {'S3.Client.create_multipart_upload': {'ContentType': content_type}}}
-    with smart_open.open(f's3://{bucket_name}/{filename}', 'w', transport_params=params) as fout:
-        json.dump(results, fout)
-    
 
-def write_csv(bucket_name, filename, fieldnames, results, content_type='text/csv'):
-    stream = io.StringIO()
-    writer = csv.DictWriter(stream, fieldnames=fieldnames)
-    params = {'client_kwargs': {'S3.Client.create_multipart_upload': {'ContentType': content_type}}}
-    with smart_open.open(f's3://{bucket_name}/{filename}', 'w', transport_params=params) as fout:
-        writer = csv.DictWriter(stream, fieldnames=fieldnames)
-        writer.writeheader()
-        fout.write(stream.getvalue())
+PART_SIZE = 5 * 1024 * 1024  # 5MB
 
-        for row in results:
-            stream.seek(0)
-            stream.truncate(0)
-            writer.writerow(row)
-            fout.write(stream.getvalue())
-    stream.close()
+
+async def write_json(client: S3Client, filename: str, results: str, content_type: str = 'text/json'):
+    def dict_sender(results: dict, chunk_size: int):
+        with io.BytesIO(json.dumps(results).encode('utf-8')) as buffer:
+            while True:
+                data = buffer.read(chunk_size)
+                if not data:
+                    break
+                yield data
+
+    await client.put_multipart(
+        filename,
+        dict_sender(
+            results,
+            chunk_size=PART_SIZE,
+        ),
+        headers={'Content-Type': content_type},
+    )
+
+async def write_csv(client: S3Client, filename: str, fieldnames: List[str], results: dict, content_type: str = 'text/csv'):
+    def csv_sender(results: dict, fieldnames: List[str], chunk_size: int):
+        with io.BytesIO() as buffer:
+            # CSV writer needs to write strings. TextIOWrapper gets us back to bytes
+            sb = io.TextIOWrapper(buffer, 'utf-8', newline='')
+            writer = csv.DictWriter(sb, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(results)
+
+            sb.flush()
+            buffer.seek(0)
+
+            while True:
+                data = buffer.read(chunk_size)
+                if not data:
+                    break
+                yield data
+
+    await client.put_multipart(
+        filename,
+        csv_sender(
+            results,
+            fieldnames,
+            chunk_size=PART_SIZE,
+        ),
+        headers={'Content-Type': content_type},
+    )

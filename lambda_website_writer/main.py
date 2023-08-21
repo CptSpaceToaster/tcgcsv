@@ -3,6 +3,7 @@ import json
 import time
 from collections import OrderedDict
 
+# TODO: Remove these two dependencies, and use aiohttp_s3_client
 import boto3
 import smart_open
 
@@ -80,7 +81,7 @@ def write_content_in_descriptor(fout, shorten_domain, written_data):
     fout.write(f'          <a href="categories.csv">Categories.csv</a>\n')
     fout.write(f'        </div>\n')
     fout.write(f'      </div>\n')
-    
+
     for category_id, category in written_data['categories'].items():
         category_name = [c for c in written_data['categories_results'] if c['categoryId'] == category_id][0]['name']
 
@@ -96,7 +97,7 @@ def write_content_in_descriptor(fout, shorten_domain, written_data):
         fout.write(f'            <a target="_blank" rel="noopener noreferrer" href="{category["groups_json"]}">Groups</a>\n')
         fout.write(f'            <a href="{category["groups_csv"]}">Groups.csv</a>\n')
         fout.write(f'          </div>\n')
-        
+
         even = True
         for group_id, group in category['groups'].items():
             group_name = [g for g in category['groups_results'] if g['groupId'] == group_id][0]['name']
@@ -119,13 +120,13 @@ def write_content_in_descriptor(fout, shorten_domain, written_data):
 def get_all_objects_in_bucket(s3, bucket_name):
     res = None
     continuation_token = None
-    
+
     while True:
         if continuation_token is None:
             r = s3.list_objects_v2(Bucket=bucket_name)
         else:
             r = s3.list_objects_v2(Bucket=bucket_name, ContinuationToken=continuation_token)
-        
+
         if res is None:
             res = r
         else:
@@ -184,7 +185,7 @@ def process_objects(objs, bucket_name):
                     written_data['categories'][group_or_category]['groups_json'] = f'{group_or_category}/{base}'
                     for json_line in smart_open.open(f's3://{bucket_name}/{group_or_category}/{base}', 'r'):
                         written_data['categories'][group_or_category]['groups_results'] = json.loads(json_line)['results']
-                    
+
             else:
                 # TODO: Also be better here
                 # Ensure the category and group structure exist...
@@ -214,9 +215,6 @@ def process_objects(objs, bucket_name):
     for val in written_data['categories'].values():
         val['groups'] = OrderedDict(sorted(val['groups'].items()))
 
-    for key, value in written_data['categories'].items():
-        print(key, value)
-
     return written_data
 
 
@@ -231,10 +229,10 @@ def lambda_handler(event, context):
 
     # Get all objects
     all_objects = get_all_objects_in_bucket(s3, bucket_name)
-    
+
     # Process data
     written_data = process_objects(all_objects['Contents'], bucket_name)
-    
+
     # Write out
     write_index(bucket_name, shorten_domain, written_data)
 
@@ -248,7 +246,7 @@ def lambda_handler(event, context):
             'CallerReference': str(time.time()).replace(".", "")
         }
     )
-    
+
     return {
         'statusCode': 200,
         'data': f'{len(written_data["categories"])}'
@@ -305,7 +303,7 @@ def test_website_generation_locally():
     with open('index.html', 'w') as fout:
         write_content_in_descriptor(fout, shorten_domain, written_data)
 
-    os.system("open index.html") 
+    os.system("open index.html")
 
 
 if __name__ == '__main__':
