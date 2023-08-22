@@ -87,7 +87,7 @@ async def main(bucket_name, public_key, private_key):
     await asyncio.gather(*(process_category(category) for category in reversed(categories)))
 
     async def process_group(category_id, group):
-        if category_id not in [1, 2, 3, 16, 62]:
+        if category_id not in [1, 2, 3, 16, 20, 24, 54, 59, 62, 71]:
             return
 
         group_id = group['groupId']
