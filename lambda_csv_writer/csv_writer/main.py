@@ -84,7 +84,11 @@ async def main(bucket_name, public_key, private_key):
             await write_csv(s3_client, f'{category_id}/{safe_category_name}Groups.csv', groups[0].keys(), groups)
 
     # TODO: Is there any way I can start the second process without blocking here like before with threads?
-    await asyncio.gather(*(process_category(category) for category in reversed(categories)))
+    await asyncio.gather(*(
+        asyncio.ensure_future(
+            process_category(category)
+        ) for category in reversed(categories)
+    ))
 
     async def process_group(category_id, group):
         if category_id not in [1, 2, 3, 16, 20, 24, 54, 59, 62, 71]:
@@ -119,7 +123,11 @@ async def main(bucket_name, public_key, private_key):
 
             await write_csv(s3_client, f'{category_id}/{group_id}/{safe_group_name}ProductsAndPrices.csv', fieldnames, products)
 
-    await asyncio.gather(*(process_group(*cgp) for cgp in category_group_pairs))
+    await asyncio.gather(*(
+        asyncio.ensure_future(
+            process_group(*cgp)
+        ) for cgp in category_group_pairs
+    ))
 
     await session.close()
 
