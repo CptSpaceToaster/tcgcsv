@@ -44,6 +44,7 @@ async def write_csv(client: S3Client, filename: str, fieldnames: List[str], resu
                 if not data:
                     break
                 yield data
+            sb.close()
 
     await client.put_multipart(
         filename,

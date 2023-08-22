@@ -11,7 +11,7 @@ resource "aws_lambda_layer_version" "lambda_support_layer" {
   source_code_hash = filebase64sha256("lambda_support_layer/layer.zip")
   layer_name = "lambda_support_layer"
 
-  compatible_runtimes = ["python3.9"]
+  compatible_runtimes = ["python3.10"]
 }
 
 resource "aws_lambda_function" "tcgplayer_json_lambda_csv_writer" {
@@ -25,7 +25,7 @@ resource "aws_lambda_function" "tcgplayer_json_lambda_csv_writer" {
 
   source_code_hash = filebase64sha256("lambda_csv_writer/bundle.zip")
 
-  runtime = "python3.9"
+  runtime = "python3.10"
 
   environment {
     variables = {

@@ -8,7 +8,7 @@ resource "aws_lambda_function" "tcgplayer_json_lambda_website_writer" {
 
   source_code_hash = filebase64sha256("lambda_website_writer/bundle.zip")
 
-  runtime = "python3.9"
+  runtime = "python3.10"
 
   environment {
     variables = {

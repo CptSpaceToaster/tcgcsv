@@ -11,7 +11,7 @@ resource "aws_lambda_function" "tcgplayer_json_lambda_expander" {
   # source_code_hash = "${base64sha256(file("lambda_function_payload.zip"))}"
   source_code_hash = filebase64sha256("lambda_expander/bundle.zip")
 
-  runtime = "python3.9"
+  runtime = "python3.10"
 
   environment {
     variables = {
@@ -30,4 +30,3 @@ resource "aws_lambda_permission" "apigw" {
   # The /*/* portion grants access from any method on any resource within the API Gateway "REST API".
   source_arn = "${aws_apigatewayv2_api.tcgplayer_json_api.execution_arn}/*/*"
 }
-

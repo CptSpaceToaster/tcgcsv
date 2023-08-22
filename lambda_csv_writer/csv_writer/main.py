@@ -1,11 +1,9 @@
 import os
 import time
 
-# TODO: Remove requests, and add asyncio and aiohttp to the lambda support layer
 import asyncio
 import aiohttp
 from aiohttp_s3_client import S3Client
-from aiohttp_s3_client.credentials import ConfigCredentials
 
 # https://blog.jonlu.ca/posts/async-python-http
 
@@ -48,11 +46,13 @@ async def main(bucket_name, public_key, private_key):
     session = aiohttp.ClientSession(connector=conn)
 
     # Initialize s3
-    credentials = ConfigCredentials()
     s3_client = S3Client(
         url=f"https://{bucket_name}.s3.us-east-1.amazonaws.com",
         session=session,
-        credentials=credentials,
+        access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+        secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+        session_token=os.getenv('AWS_SESSION_TOKEN'),
+
     )
 
     # Initialize TCGPlayerSDK
@@ -137,27 +137,23 @@ def lambda_handler(event, context):
     public_key = os.getenv('TCGPLAYER_PUBLIC_KEY')
     private_key = os.getenv('TCGPLAYER_PRIVATE_KEY')
 
-    return main(bucket_name, public_key, private_key)
+    response = asyncio.run(
+        main(bucket_name, public_key, private_key)
+    )
+
+    return response
 
 
 if __name__ == '__main__':
-    import time
-
     os.environ['AWS_SHARED_CREDENTIALS_FILE'] = f'{os.path.expanduser("~")}/.aws/personal_credentials'
-
-    start = time.time()
 
     bucket_name = os.getenv('TCGCSV_BUCKET_NAME')
     public_key = os.getenv('TF_VAR_TCGPLAYER_PUBLIC_KEY')
     private_key = os.getenv('TF_VAR_TCGPLAYER_PRIVATE_KEY')
 
-    response = asyncio.get_event_loop().run_until_complete(
+    response = asyncio.run(
         main(bucket_name, public_key, private_key)
     )
-
-    delta = time.time() - start
-
-    # print(f'{int(delta // 60)} minutes {int(delta % 60)} seconds')
 
     with open('local.txt', 'w') as f:
         f.write(str(response['data']))
