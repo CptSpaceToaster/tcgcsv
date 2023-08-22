@@ -41,20 +41,19 @@ async def write_csv(client: aiohttp_s3_client.S3Client, filename: str, fieldname
     def csv_sender(results: dict, fieldnames: List[str], chunk_size: int):
         with io.BytesIO() as buffer:
             # CSV writer needs to write strings. TextIOWrapper gets us back to bytes
-            sb = io.TextIOWrapper(buffer, 'utf-8', newline='')
-            writer = csv.DictWriter(sb, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(results)
+            with io.TextIOWrapper(buffer, 'utf-8', newline='') as sb:
+                writer = csv.DictWriter(sb, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerows(results)
 
-            sb.flush()
-            buffer.seek(0)
+                sb.flush()
+                buffer.seek(0)
 
-            while True:
-                data = buffer.read(chunk_size)
-                if not data:
-                    break
-                yield data
-            sb.close()
+                while True:
+                    data = buffer.read(chunk_size)
+                    if not data:
+                        break
+                    yield data
 
     running = True
     tries = 20

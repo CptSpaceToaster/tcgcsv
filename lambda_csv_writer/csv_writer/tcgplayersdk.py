@@ -8,14 +8,6 @@ try:
 except ImportError:
     from exceptions import TCGPlayerSDKException
 
-if logging.getLogger().hasHandlers():
-    # The Lambda environment pre-configures a handler logging to stderr. If a handler is already configured,
-    # `.basicConfig` does not execute. Thus we set the level directly.
-    logging.getLogger().setLevel(logging.INFO)
-else:
-    logging.basicConfig(level=logging.INFO)
-
-
 TCGPLAYER_BASE_URL = 'https://api.tcgplayer.com'
 TCGPLAYER_API_VERSION = 'v1.39.0'
 TCGPLAYER_API_URL = f'{TCGPLAYER_BASE_URL}/{TCGPLAYER_API_VERSION}'
@@ -88,7 +80,6 @@ class TCGPlayerSDK():
         return res
 
     async def get_categories(self, sort_order='categoryId', sort_desc=False):
-        logging.info('get_categories()')
         return await self._get_all_pages(
             f'{TCGPLAYER_API_URL}/catalog/categories',
             extra_params={
@@ -98,7 +89,6 @@ class TCGPlayerSDK():
         )
 
     async def get_groups(self, category_id, sort_order='publishedOn', sort_desc=True):
-        logging.info('get_groups(%s)', category_id)
         return await self._get_all_pages(
             f'{TCGPLAYER_API_URL}/catalog/categories/{category_id}/groups',
             extra_params={
@@ -108,7 +98,6 @@ class TCGPlayerSDK():
         )
 
     async def get_products_for_group(self, group_id, sort_order='name', sort_desc=False, get_extended_fields=True):
-        logging.info('get_products_for_group(%s)', group_id)
         return await self._get_all_pages(
             f'{TCGPLAYER_API_URL}/catalog/products',
             extra_params={
@@ -120,7 +109,6 @@ class TCGPlayerSDK():
         )
 
     async def get_prices_for_group(self, group_id):
-        logging.info('get_prices_for_group(%s)', group_id)
         r = await self.session.get(
             f'{TCGPLAYER_API_URL}/pricing/group/{group_id}',
             headers={'Authorization': await self.token},

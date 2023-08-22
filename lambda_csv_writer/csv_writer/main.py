@@ -40,99 +40,108 @@ def overwriteURL(product):
 async def main(bucket_name, public_key, private_key):
     start = time.time()
 
+    total_requests = 0
+    files_written = 0
+
     MAX_CONCURRENCY = 400
 
     conn = aiohttp.TCPConnector(limit_per_host=MAX_CONCURRENCY, limit=0, ttl_dns_cache=300)
-    session = aiohttp.ClientSession(connector=conn)
+    async with aiohttp.ClientSession(connector=conn) as session:
+        # Initialize s3
+        s3_client = S3Client(
+            url=f"https://{bucket_name}.s3.us-east-1.amazonaws.com",
+            session=session,
+            access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+            secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+            session_token=os.getenv('AWS_SESSION_TOKEN'),
 
-    # Initialize s3
-    s3_client = S3Client(
-        url=f"https://{bucket_name}.s3.us-east-1.amazonaws.com",
-        session=session,
-        access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-        secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-        session_token=os.getenv('AWS_SESSION_TOKEN'),
+        )
 
-    )
+        # Initialize TCGPlayerSDK
+        tcgplayer = TCGPlayerSDK(session, public_key, private_key)
 
-    # Initialize TCGPlayerSDK
-    tcgplayer = TCGPlayerSDK(session, public_key, private_key)
+        # Generate content
+        categories_response = await tcgplayer.get_categories()
+        await write_json(s3_client, 'categories', categories_response)
+        categories = categories_response['results']
+        await write_csv(s3_client, 'categories.csv', categories[0].keys(), categories)
 
-    # Generate content
-    categories_response = await tcgplayer.get_categories()
-    await write_json(s3_client, 'categories', categories_response)
-    categories = categories_response['results']
-    await write_csv(s3_client, 'categories.csv', categories[0].keys(), categories)
+        total_requests += 1
+        files_written += 2
 
-    semaphore = asyncio.Semaphore(MAX_CONCURRENCY)
+        semaphore = asyncio.Semaphore(MAX_CONCURRENCY)
 
-    category_group_pairs = []
+        category_group_pairs = []
 
-    async def process_category(category):
-        category_name = category['name']
-        category_id = category['categoryId']
-        safe_category_name = category_name.replace('&', 'And').replace(' ', '')
-        async with semaphore:
-            groups_response = await tcgplayer.get_groups(category_id)
-            await write_json(s3_client, f'{category_id}/groups', groups_response)
+        async def process_category(category):
+            category_name = category['name']
+            category_id = category['categoryId']
+            safe_category_name = category_name.replace('&', 'And').replace(' ', '')
+            async with semaphore:
+                groups_response = await tcgplayer.get_groups(category_id)
+                await write_json(s3_client, f'{category_id}/groups', groups_response)
 
-            groups = groups_response['results']
-            category_group_pairs.extend([(category_id, group) for group in groups])
+                groups = groups_response['results']
+                category_group_pairs.extend([(category_id, group) for group in groups])
 
-            if len(groups) == 0: # Apparently there is a category without any groups
-                return
-            await write_csv(s3_client, f'{category_id}/{safe_category_name}Groups.csv', groups[0].keys(), groups)
+                if len(groups) == 0: # Apparently there is a category without any groups
+                    return
+                await write_csv(s3_client, f'{category_id}/{safe_category_name}Groups.csv', groups[0].keys(), groups)
 
-    # TODO: Is there any way I can start the second process without blocking here like before with threads?
-    await asyncio.gather(*(
-        asyncio.ensure_future(
-            process_category(category)
-        ) for category in reversed(categories)
-    ))
+        # TODO: Is there any way I can start the second process without blocking here like before with threads?
+        await asyncio.gather(*(
+            asyncio.ensure_future(
+                process_category(category)
+            ) for category in reversed(categories)
+        ))
 
-    async def process_group(category_id, group):
-        group_id = group['groupId']
-        safe_group_name = group['name'].replace('&', 'And').replace(' ', '').replace(':', '').replace('.', '').replace('/', '-')
-        async with semaphore:
-            products_response = await tcgplayer.get_products_for_group(group_id)
-            await write_json(s3_client, f'{category_id}/{group_id}/products', products_response)
-            prices_response = await tcgplayer.get_prices_for_group(group_id)
-            await write_json(s3_client, f'{category_id}/{group_id}/prices', prices_response)
+        total_requests += len(categories)
+        files_written += len(categories) * 2 - 1 # that pesky empty category
 
-            products = products_response['results']
-            prices = prices_response['results']
+        async def process_group(category_id, group):
+            group_id = group['groupId']
+            safe_group_name = group['name'].replace('&', 'And').replace(' ', '').replace(':', '').replace('.', '').replace('/', '-')
+            async with semaphore:
+                products_response = await tcgplayer.get_products_for_group(group_id)
+                await write_json(s3_client, f'{category_id}/{group_id}/products', products_response)
+                prices_response = await tcgplayer.get_prices_for_group(group_id)
+                await write_json(s3_client, f'{category_id}/{group_id}/prices', prices_response)
 
-            fieldnames = []
-            for product in products:
-                overwriteURL(product)
-                injectPricesIntoProducts(product, prices)
-                flattenExtendedData(product)
+                products = products_response['results']
+                prices = prices_response['results']
 
-                # Filter out any keys
-                for key in ['presaleInfo']:
-                    product.pop(key, None)
+                fieldnames = []
+                for product in products:
+                    overwriteURL(product)
+                    injectPricesIntoProducts(product, prices)
+                    flattenExtendedData(product)
 
-                # This is probably inefficient, but it should preserve some order in the CSV
-                # TODO: Profile this
-                for key in product.keys():
-                    if key not in fieldnames:
-                        fieldnames.append(key)
+                    # Filter out any keys
+                    for key in ['presaleInfo']:
+                        product.pop(key, None)
 
-            await write_csv(s3_client, f'{category_id}/{group_id}/{safe_group_name}ProductsAndPrices.csv', fieldnames, products)
+                    # This is probably inefficient, but it should preserve some order in the CSV
+                    # TODO: Profile this
+                    for key in product.keys():
+                        if key not in fieldnames:
+                            fieldnames.append(key)
 
-    await asyncio.gather(*(
-        asyncio.ensure_future(
-            process_group(*cgp)
-        ) for cgp in category_group_pairs
-    ))
+                await write_csv(s3_client, f'{category_id}/{group_id}/{safe_group_name}ProductsAndPrices.csv', fieldnames, products)
 
-    await session.close()
+        await asyncio.gather(*(
+            asyncio.ensure_future(
+                process_group(*cgp)
+            ) for cgp in category_group_pairs
+        ))
+
+        total_requests += len(category_group_pairs) * 2
+        files_written += len(category_group_pairs) * 3
 
     delta = time.time() - start
 
     return {
         'statusCode': 200,
-        'data': f'{int(delta // 60)} minutes, {int(delta % 60)} seconds'
+        'data': f'{{"total_requests": {total_requests}, "files_written": {files_written}, "time_elapsed": "{int(delta // 60)} minutes, {int(delta % 60)} seconds"}}'
     }
 
 
