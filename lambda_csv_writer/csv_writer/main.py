@@ -76,15 +76,20 @@ async def main(bucket_name, public_key, private_key):
         async def process_category(category):
             category_name = category['name']
             category_id = category['categoryId']
+
+            if category_id in [21]: # Ignore the duplicate (and empty) "My Little Pony" group all-together
+                return
+
             safe_category_name = category_name.replace('&', 'And').replace(' ', '')
             async with semaphore:
                 groups_response = await tcgplayer.get_groups(category_id)
                 await write_json(s3_client, f'{category_id}/groups', groups_response)
 
                 groups = groups_response['results']
-                category_group_pairs.extend([(category_id, group) for group in groups])
+                if category_id not in [69, 70]: # Marvel & DC Comics seem to ONLY have empty product lists... and filtering them here saves a bundle of time and energy
+                    category_group_pairs.extend([(category_id, group) for group in groups])
 
-                if len(groups) == 0: # Apparently there is a category without any groups
+                if len(groups) == 0: # Apparently categories can exist without groups (rarely)
                     return
                 await write_csv(s3_client, f'{category_id}/{safe_category_name}Groups.csv', groups[0].keys(), groups)
 
