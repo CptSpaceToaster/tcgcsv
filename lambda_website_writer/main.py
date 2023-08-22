@@ -49,10 +49,7 @@ template_start = '''<!doctype html>
       <h1>TCGPlayer CSV & JSON Dumps</h1>
       <p>Ahoy There! I'm CptSpaceToaster!</p>
       <p>This website is a personal project of mine that exposes some information from TCGPlayer's API. The TCGPlayer API responses used to generate the content on this website are cached as json dumps and made available. The resulting tree of categories, groups, products, and prices is walked for some of the popular categories so I could share some data from TCGPlayer's API to folks who want it but can't get API access. The JSON text dumps are straight from TCGPlayer. The CSV's that I've put together DO have my personal affiliate links in there.</p>
-      <p>All content <i>should</i> be updated daily, but things are VERY ramshackle at the moment. The current roadmap has a lot to do!</p>
-      <ul>
-        <li>I would like to get all categories at some point, but I'm running up against a lambda timeout even after some threading shenanigans</li>
-      </ul>
+      <p>All content <i>should</i> be updated daily, but things are VERY ramshackle at the moment.</p>
       <p>You can join this <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25">discord</a> to contact me, get updates, and talk about what would be cool to have next!</p>
       <p>You can see my terraform learnings, AWS infrastructure, and open source mess on <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv">Github</a></p>
       <p>If you would like to support this project, please consider using my <a href="https://cpt.tcgcsv.com">affiliate link</a> to help keep the lights on</p>

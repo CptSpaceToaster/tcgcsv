@@ -3,13 +3,13 @@ import csv
 import json
 from typing import List
 
-from aiohttp_s3_client import S3Client
+import aiohttp_s3_client
 
 
 PART_SIZE = 5 * 1024 * 1024  # 5MB
 
 
-async def write_json(client: S3Client, filename: str, results: str, content_type: str = 'text/json'):
+async def write_json(client: aiohttp_s3_client.S3Client, filename: str, results: dict, content_type: str = 'text/json'):
     def dict_sender(results: dict, chunk_size: int):
         with io.BytesIO(json.dumps(results).encode('utf-8')) as buffer:
             while True:
@@ -18,16 +18,26 @@ async def write_json(client: S3Client, filename: str, results: str, content_type
                     break
                 yield data
 
-    await client.put_multipart(
-        filename,
-        dict_sender(
-            results,
-            chunk_size=PART_SIZE,
-        ),
-        headers={'Content-Type': content_type},
-    )
+    running = True
+    tries = 20
+    while running and tries > 0:
+        try:
+            await client.put_multipart(
+                filename,
+                dict_sender(
+                    results,
+                    chunk_size=PART_SIZE,
+                ),
+                headers={'Content-Type': content_type},
+                part_upload_tries=20,
+            )
+            running = False
+        except aiohttp_s3_client.client.AwsUploadError as e:
+            tries -= 1
+            if tries == 0:
+                raise e
 
-async def write_csv(client: S3Client, filename: str, fieldnames: List[str], results: dict, content_type: str = 'text/csv'):
+async def write_csv(client: aiohttp_s3_client.S3Client, filename: str, fieldnames: List[str], results: dict, content_type: str = 'text/csv'):
     def csv_sender(results: dict, fieldnames: List[str], chunk_size: int):
         with io.BytesIO() as buffer:
             # CSV writer needs to write strings. TextIOWrapper gets us back to bytes
@@ -46,12 +56,22 @@ async def write_csv(client: S3Client, filename: str, fieldnames: List[str], resu
                 yield data
             sb.close()
 
-    await client.put_multipart(
-        filename,
-        csv_sender(
-            results,
-            fieldnames,
-            chunk_size=PART_SIZE,
-        ),
-        headers={'Content-Type': content_type},
-    )
+    running = True
+    tries = 20
+    while running and tries > 0:
+        try:
+            await client.put_multipart(
+                filename,
+                csv_sender(
+                    results,
+                    fieldnames,
+                    chunk_size=PART_SIZE,
+                ),
+                headers={'Content-Type': content_type},
+                part_upload_tries=20,
+            )
+            running = False
+        except aiohttp_s3_client.client.AwsUploadError as e:
+            tries -= 1
+            if tries == 0:
+                raise e

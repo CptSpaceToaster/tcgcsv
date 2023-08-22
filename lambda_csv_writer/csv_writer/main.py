@@ -91,9 +91,6 @@ async def main(bucket_name, public_key, private_key):
     ))
 
     async def process_group(category_id, group):
-        if category_id not in [1, 2, 3, 16, 20, 24, 54, 59, 62, 71]:
-            return
-
         group_id = group['groupId']
         safe_group_name = group['name'].replace('&', 'And').replace(' ', '').replace(':', '').replace('.', '').replace('/', '-')
         async with semaphore:

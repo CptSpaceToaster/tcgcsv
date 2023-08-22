@@ -70,12 +70,9 @@ class TCGPlayerSDK():
             if parsed['errors'] != []:
                 # 404 WITH CONTENT IS NOT OK
                 if parsed['errors'] == ['No products were found.']:
-                    parsed = {
-                        "success": True,
-                        "errors": [],
-                        "results": [],
-                        "totalItems": 0
-                    }
+                    parsed["success"] = True
+                    parsed["errors"] = []
+                    parsed["results"] = []
                 else:
                     raise TCGPlayerSDKException(r)
 
@@ -85,7 +82,7 @@ class TCGPlayerSDK():
                 res['results'].extend(parsed['results'])
 
             offset += limit
-            if len(res['results']) >= res['totalItems']:
+            if len(res['results']) >= res.get('totalItems', 0):
                 break
 
         return res
@@ -132,11 +129,10 @@ class TCGPlayerSDK():
         if response['errors'] != []:
             # 404 WITH CONTENT IS (still) NOT OK
             if response['errors'] == ['No products were found.']:
-                response = {
-                    "success": True,
-                    "errors": [],
-                    "results": [],
-                }
+                response["success"] = True
+                response["errors"] = []
+                response["results"] = []
+
             else:
                 raise TCGPlayerSDKException(r)
 
