@@ -40,7 +40,7 @@ def overwriteURL(product):
 async def main(bucket_name, public_key, private_key):
     start = time.time()
 
-    MAX_CONCURRENCY = 100
+    MAX_CONCURRENCY = 400
 
     conn = aiohttp.TCPConnector(limit_per_host=MAX_CONCURRENCY, limit=0, ttl_dns_cache=300)
     session = aiohttp.ClientSession(connector=conn)

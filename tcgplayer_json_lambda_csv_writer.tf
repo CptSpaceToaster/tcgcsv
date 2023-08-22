@@ -20,7 +20,7 @@ resource "aws_lambda_function" "tcgplayer_json_lambda_csv_writer" {
   role          = aws_iam_role.lambda-s3-executor-role.arn
   handler       = "csv_writer.main.lambda_handler"
   timeout       = 900
-  memory_size = 1024
+  memory_size   = 3008
   layers = [aws_lambda_layer_version.lambda_support_layer.arn]
 
   source_code_hash = filebase64sha256("lambda_csv_writer/bundle.zip")

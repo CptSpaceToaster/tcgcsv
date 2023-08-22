@@ -3,7 +3,8 @@ resource "aws_lambda_function" "tcgplayer_json_lambda_website_writer" {
   function_name = "tcgcsv_website_writer"
   role          = aws_iam_role.lambda-s3-executor-role.arn
   handler       = "main.lambda_handler"
-  timeout       = 60
+  timeout       = 300
+  memory_size   = 512
   layers = [aws_lambda_layer_version.lambda_support_layer.arn]
 
   source_code_hash = filebase64sha256("lambda_website_writer/bundle.zip")
