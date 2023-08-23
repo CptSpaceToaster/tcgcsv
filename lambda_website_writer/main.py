@@ -23,13 +23,20 @@ template_start = '''<!doctype html>
     <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap" rel="stylesheet">
+
     <style>
       .content-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; margin-bottom: 12px; }
       .links { margin-bottom: 2px; }
       .e { background-color: #EEE; }
-      .b { border-bottom: 1px solid #000; }
       .z { color: #AAA; }
+      header { margin-right: 16px; display: flex; align-items: center; gap: 24px; }
+      header > *:first-child { flex-grow: 1; }
+      header a img { height: 40px; }
       summary { font-size: 24px; margin-bottom: 4px; border-bottom: 1px solid #000; }
+      h1, h3, summary { font-family: 'Roboto Slab', serif; }
       @media (prefers-color-scheme: dark) {
         body { color: White; background: #222; }
         a { color: SkyBlue; }
@@ -46,15 +53,20 @@ template_start = '''<!doctype html>
   </head>
   <body>
     <header>
-      <h1>TCGPlayer CSV & JSON Dumps</h1>
-      <p>Ahoy There! I'm CptSpaceToaster!</p>
-      <p>This website is a personal project of mine that exposes some information from TCGPlayer's API. The TCGPlayer API responses used to generate the content on this website are cached as json dumps and made available. The resulting tree of categories, groups, products, and prices is walked for some of the popular categories so I could share some data from TCGPlayer's API to folks who want it but can't get API access. The JSON text dumps are straight from TCGPlayer. The CSV's that I've put together DO have my personal affiliate links in there.</p>
-      <p>All content <i>should</i> be updated daily, but things are VERY ramshackle at the moment.</p>
-      <p>You can join this <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25">discord</a> to contact me, get updates, and talk about what would be cool to have next!</p>
+      <h1>TCGPlayer CSV & JSON&nbsp;Dumps</h1>
+      <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv"><img alt="Github Repo" src="/github-mark.svg"></a>
+      <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25"><img alt="Join Discord" src="/discord-mark.svg"></a>
+      <a target="_blank" rel="noopener noreferrer" href="https://cpt.tcgcsv.com"><img alt="TCGPlayer Affiliate Link" src="/TCGplayer-logo-primary.png"></a>
+    </header>
+    <section>
+      <h3>Ahoy There!</h3>
+      <p>I'm CptSpaceToaster! This website is a personal project of mine that exposes categories, groups, products, and prices from TCGPlayer's API. The results are shared here for folks who can't get access to TCGPlayer's API. All responses used to generate the content on this website are cached as unmodified JSON text-files. The CSV's that I've put together DO have my personal affiliate links in there.</p>
+      <p>All content <i>should</i> update daily.</p>
+      <p>You can join this <a target="_blank" rel="noopener noreferrer" href="">discord</a> to contact me, get updates, and talk about what would be cool to have next!</p>
       <p>You can see my terraform learnings, AWS infrastructure, and open source mess on <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv">Github</a></p>
       <p>If you would like to support this project, please consider using my <a href="https://cpt.tcgcsv.com">affiliate link</a> to help keep the lights on</p>
-      <br>
-    </header>
+    </section>
+    <br>
     <main>
 '''
 
@@ -144,7 +156,18 @@ def process_objects(objs, bucket_name):
         'categories_results': [],
     }
 
-    ignored_files = ['index.html', 'manifest.webmanifest', 'apple-touch-icon.png', 'favicon.ico', 'icon-192.png', 'icon-512.png', 'icon.svg']
+    ignored_files = [
+        'index.html',
+        'manifest.webmanifest',
+        'apple-touch-icon.png',
+        'favicon.ico',
+        'icon-192.png',
+        'icon-512.png',
+        'icon.svg',
+        'github-mark.svg',
+        'discord-mark.svg',
+        'TCGplayer-logo-primary.png',
+    ]
 
     for obj in objs:
         name = obj['Key']
@@ -260,6 +283,9 @@ def test_website_generation_locally():
             'categoryId': 1,
             'name': 'Magic',
         }, {
+            'categoryId': 2,
+            'name': 'YuGiOh',
+        }, {
             'categoryId': 3,
             'name': 'Pokemon',
         }],
@@ -278,6 +304,12 @@ def test_website_generation_locally():
                         'combined_csv': '1/1/10thEditionProductsAndPrices',
                     }
                 },
+            },
+            2: {
+                'groups_json': '2/groups',
+                'groups_csv': '2/YuGiOhGroups.csv',
+                'group_results': [],
+                'groups': {},
             },
             3: {
                 'groups_json': '3/groups',
