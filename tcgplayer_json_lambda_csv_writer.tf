@@ -33,6 +33,7 @@ resource "aws_lambda_function" "tcgplayer_json_lambda_csv_writer" {
       TCGPLAYER_PUBLIC_KEY = var.TCGPLAYER_PUBLIC_KEY
       TCGPLAYER_PRIVATE_KEY = var.TCGPLAYER_PRIVATE_KEY
       TCGCSV_SHORTEN_DOMAIN = "https://${aws_apigatewayv2_domain_name.cpt.domain_name}"
+      TCGCSV_DISTRIBUTION_ID = aws_cloudfront_distribution.s3_distribution.id
     }
   }
 }

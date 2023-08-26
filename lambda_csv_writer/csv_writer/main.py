@@ -4,6 +4,7 @@ import time
 import asyncio
 import aiohttp
 from aiohttp_s3_client import S3Client
+import boto3
 
 # https://blog.jonlu.ca/posts/async-python-http
 
@@ -20,16 +21,17 @@ except ImportError:
 def flattenExtendedData(product):
     # This modifies the results dictionary in-place
     if 'extendedData' in product:
-        extendedData = product.pop('extendedData', None)
-        for extendedDataItem in extendedData:
-            product[f'ext{extendedDataItem["name"].replace(" ", "")}'] = extendedDataItem["value"]
+        extended_data = product.pop('extendedData', None)
+        for extended_data_item in extended_data:
+            product[f'ext{extended_data_item["name"].replace(" ", "")}'] = extended_data_item["value"]
 
 
 def injectPricesIntoProducts(product, prices):
     matching_prices = [price for price in prices if product['productId'] == price['productId']]
     if len(matching_prices) > 0:
-        # TODO: If len(matching_prices) ever yields anything other than 1... we should probably log.
-        product.update(matching_prices[0])
+        for price in matching_prices:
+            sub_type_name = price.pop('subTypeName', None).replace(" ", "")
+            product.update({f'{key}{sub_type_name}': value for key, value in price.items()})
 
 
 def overwriteURL(product):
@@ -37,13 +39,15 @@ def overwriteURL(product):
         product['url'] = shorten(product['productId'])
 
 
-async def main(bucket_name, public_key, private_key):
+async def main(bucket_name, public_key, private_key, distribution_id):
     start = time.time()
 
     total_requests = 0
     files_written = 0
 
     MAX_CONCURRENCY = 400
+
+    cf = boto3.client('cloudfront')
 
     conn = aiohttp.TCPConnector(limit_per_host=MAX_CONCURRENCY, limit=0, ttl_dns_cache=300)
     async with aiohttp.ClientSession(connector=conn) as session:
@@ -144,6 +148,18 @@ async def main(bucket_name, public_key, private_key):
 
     delta = time.time() - start
 
+
+    cf.create_invalidation(
+        DistributionId=distribution_id,
+        InvalidationBatch={
+            'Paths': {
+                'Quantity': 1,
+                'Items': ['/*']
+            },
+            'CallerReference': str(time.time()).replace(".", "")
+        }
+    )
+
     return {
         'statusCode': 200,
         'data': f'{{"total_requests": {total_requests}, "files_written": {files_written}, "time_elapsed": "{int(delta // 60)} minutes, {int(delta % 60)} seconds"}}'
@@ -155,9 +171,10 @@ def lambda_handler(event, context):
     bucket_name = os.getenv('TCGCSV_BUCKET_NAME')
     public_key = os.getenv('TCGPLAYER_PUBLIC_KEY')
     private_key = os.getenv('TCGPLAYER_PRIVATE_KEY')
+    distribution_id = os.getenv('TCGCSV_DISTRIBUTION_ID')
 
     response = asyncio.run(
-        main(bucket_name, public_key, private_key)
+        main(bucket_name, public_key, private_key, distribution_id)
     )
 
     return response
@@ -169,9 +186,10 @@ if __name__ == '__main__':
     bucket_name = os.getenv('TCGCSV_BUCKET_NAME')
     public_key = os.getenv('TF_VAR_TCGPLAYER_PUBLIC_KEY')
     private_key = os.getenv('TF_VAR_TCGPLAYER_PRIVATE_KEY')
+    distribution_id = os.getenv('TCGCSV_DISTRIBUTION_ID')
 
     response = asyncio.run(
-        main(bucket_name, public_key, private_key)
+        main(bucket_name, public_key, private_key, distribution_id)
     )
 
     with open('local.txt', 'w') as f:
