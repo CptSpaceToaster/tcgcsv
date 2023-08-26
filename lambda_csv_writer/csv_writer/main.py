@@ -1,5 +1,6 @@
 import os
 import time
+import copy
 
 import asyncio
 import aiohttp
@@ -18,20 +19,13 @@ except ImportError:
     from csv_utils import write_json, write_csv
     from shorten import shorten
 
+
 def flattenExtendedData(product):
     # This modifies the results dictionary in-place
     if 'extendedData' in product:
         extended_data = product.pop('extendedData', None)
         for extended_data_item in extended_data:
             product[f'ext{extended_data_item["name"].replace(" ", "")}'] = extended_data_item["value"]
-
-
-def injectPricesIntoProducts(product, prices):
-    matching_prices = [price for price in prices if product['productId'] == price['productId']]
-    if len(matching_prices) > 0:
-        for price in matching_prices:
-            sub_type_name = price.pop('subTypeName', None).replace(" ", "")
-            product.update({f'{key}{sub_type_name}': value for key, value in price.items()})
 
 
 def overwriteURL(product):
@@ -119,15 +113,25 @@ async def main(bucket_name, public_key, private_key, distribution_id):
                 products = products_response['results']
                 prices = prices_response['results']
 
+                products_to_write = []
                 fieldnames = []
                 for product in products:
                     overwriteURL(product)
-                    injectPricesIntoProducts(product, prices)
                     flattenExtendedData(product)
 
                     # Filter out any keys
                     for key in ['presaleInfo']:
                         product.pop(key, None)
+
+                    # duplicate rows if there are multiple prices
+                    matching_prices = [price for price in prices if product['productId'] == price['productId']]
+                    if len(matching_prices) > 0:
+                        for price in matching_prices:
+                            product.update(price)
+                            # write a deep copy
+                            products_to_write.append(copy.deepcopy(product))
+                    else:
+                        products_to_write.append(product)
 
                     # This is probably inefficient, but it should preserve some order in the CSV
                     # TODO: Profile this
@@ -135,7 +139,7 @@ async def main(bucket_name, public_key, private_key, distribution_id):
                         if key not in fieldnames:
                             fieldnames.append(key)
 
-                await write_csv(s3_client, f'{category_id}/{group_id}/{safe_group_name}ProductsAndPrices.csv', fieldnames, products)
+                await write_csv(s3_client, f'{category_id}/{group_id}/{safe_group_name}ProductsAndPrices.csv', fieldnames, products_to_write)
 
         await asyncio.gather(*(
             asyncio.ensure_future(
