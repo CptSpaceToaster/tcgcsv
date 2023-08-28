@@ -3,8 +3,8 @@ import json
 import time
 from collections import OrderedDict
 
-# TODO: Remove these two dependencies, and use aiohttp_s3_client
 import boto3
+# TODO: Remove smart_open, and use aiohttp_s3_client
 import smart_open
 
 
@@ -32,11 +32,10 @@ template_start = '''<!doctype html>
       .links { margin-bottom: 2px; }
       .e { background-color: #EEE; }
       .z { color: #AAA; }
-      header { margin-right: 16px; display: flex; align-items: center; gap: 24px; }
-      header > *:first-child { flex-grow: 1; }
+      header { margin-right: 16px; display: grid; align-items: center; column-gap: 24px; grid-template-columns: 1fr min-content min-content min-content; }
       header a img { height: 40px; }
       summary { font-size: 24px; margin-bottom: 4px; border-bottom: 1px solid #000; }
-      h1, h3, summary { font-family: 'Roboto Slab', serif; }
+      summary, h1, h3 { font-family: 'Roboto Slab', serif; }
       @media (prefers-color-scheme: dark) {
         body { color: White; background: #222; }
         a { color: SkyBlue; }
@@ -45,9 +44,10 @@ template_start = '''<!doctype html>
         .z { color: #666; }
         summary { border-bottom: 1px solid #555; }
       }
-      @media (max-width: 550px) {
+      @media (max-width: 576px) {
         .content-grid { grid-template-columns: 1fr; }
-        h2 { grid-column: unset; }
+        header { grid-template-rows: min-content min-content; grid-template-columns: min-content min-content 1fr; }
+        header *:first-child { grid-column: span 3; }
       }
     </style>
   </head>
@@ -62,8 +62,8 @@ template_start = '''<!doctype html>
       <h3>Ahoy There!</h3>
       <p>I'm CptSpaceToaster! This website is a personal project of mine that exposes categories, groups, products, and prices from TCGPlayer's API. The results are shared here for folks who can't get access to TCGPlayer's API. All responses used to generate the content on this website are cached as unmodified JSON text-files. The CSV's that I've put together DO have my personal affiliate links in there.</p>
       <p>All content <i>should</i> update daily.</p>
-      <p>You can join this <a target="_blank" rel="noopener noreferrer" href="">discord</a> to contact me, get updates, and talk about what would be cool to have next!</p>
       <p>You can see my terraform learnings, AWS infrastructure, and open source mess on <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv">Github</a></p>
+      <p>You can join this <a target="_blank" rel="noopener noreferrer" href="">discord</a> to contact me, get updates, and talk about what would be cool to have next!</p>
       <p>If you would like to support this project, please consider using my <a href="https://cpt.tcgcsv.com">affiliate link</a> to help keep the lights on</p>
     </section>
     <br>
@@ -72,6 +72,15 @@ template_start = '''<!doctype html>
 
 template_end = '''    </main>
   </body>
+  <footer>
+    <p>With special thanks to our friends:</p>
+    <ul>
+      <li>luceleaftea for maintaining a separate pile of CSVs on <a target="_blank" rel="noopener noreferrer" href="https://github.com/the-fab-cube/flesh-and-blood-cards">Github</a> for Flesh and Blood</li>
+      <li>nago for hosting a wonderful pile of pokemon related assets over at <a target="_blank" rel="noopener noreferrer" href="https://malie.io/static/">Malie.io</a></li>
+      <li>ZeldaZach for helping answer questions in TCGPlayer's discord with me, while also maintaining <a target="_blank" rel="noopener noreferrer" href="https://mtgjson.com">MTGJSON.com</a></li>
+      <li>And viewers like you!</li>
+    </ul>
+  </footer>
 </html>
 '''
 
@@ -177,6 +186,7 @@ def process_objects(objs, bucket_name):
         base = os.path.basename(name)
         category_and_group = os.path.dirname(name)
 
+        # TODO: This whole dictionary walking mess can likely be replaced if I walk my own JSON output directly
         if category_and_group == '':
             if base.endswith('.csv'):
                 written_data['categories_csv'] = base
@@ -189,7 +199,6 @@ def process_objects(objs, bucket_name):
             group_or_category = int(os.path.basename(category_and_group))
             category = os.path.dirname(category_and_group)
             if category == '':
-                # TODO: be better
                 # Ensure the category structure exist...
                 cat = written_data['categories'].get(group_or_category, {
                     'groups_json': '',
@@ -207,7 +216,7 @@ def process_objects(objs, bucket_name):
                         written_data['categories'][group_or_category]['groups_results'] = json.loads(json_line)['results']
 
             else:
-                # TODO: Also be better here
+                # TODO: This default dictionary assertion stuff smells bad
                 # Ensure the category and group structure exist...
                 category = int(category)
                 cat = written_data['categories'].get(category, {
@@ -261,7 +270,7 @@ def lambda_handler(event, context):
         InvalidationBatch={
             'Paths': {
                 'Quantity': 1,
-                'Items': ['/*']
+                'Items': ['/index.html',]
             },
             'CallerReference': str(time.time()).replace(".", "")
         }

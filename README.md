@@ -4,6 +4,8 @@
 
 ### Project setup
 
+The current development environment relies on pyenv & poetry, and some setup instructions I haven't written yet. Please message me on discord if you're looking to get things running, and I can prioritize writing instructions here.
+
 To install the AWS CLI
 ```
 brew install awscli - https://formulae.brew.sh/formula/awscli
@@ -61,5 +63,11 @@ AWS_SHARED_CREDENTIALS_FILE='~/.aws/personal_credentials' aws lambda invoke --re
 
 https://cpt.tcgcsv.com/JC63 should redirect to "Bingo" https://www.tcgplayer.com/product/261484
 
-We can store files in S3 and serve them through cloudfront now! 
-  - https://d2k043kz2pm3nn.cloudfront.net/categories
+We can store files in S3 and serve them through cloudfront now!
+  - https://tcgcsv.com/categories
+  - https://tcgcsv.com/categories.csv
+  - https://tcgcsv.com/1/groups
+  - https://tcgcsv.com/1/groups.csv
+  - https://tcgcsv.com/1/1/products
+  - https://tcgcsv.com/1/1/prices
+  - https://tcgcsv.com/1/1/10thEditionProductsAndPrices.csv
