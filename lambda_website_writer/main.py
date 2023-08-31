@@ -32,16 +32,21 @@ template_start = '''<!doctype html>
       .links { margin-bottom: 2px; }
       .e { background-color: #EEE; }
       .z { color: #AAA; }
+      .u { color: Black; }
+      .c { color: DarkSeaGreen; font-style: italic; }
+      a:visited, .s { color: #639; }
       header { margin-right: 16px; display: grid; align-items: center; column-gap: 24px; grid-template-columns: 1fr min-content min-content min-content; }
       header a img { height: 40px; }
       summary { font-size: 24px; margin-bottom: 4px; border-bottom: 1px solid #000; }
       summary, h1, h3 { font-family: 'Roboto Slab', serif; }
+      code div { overflow: auto; max-width: 720px; border: solid gray; border-width: 2px 2px 2px 12px; padding:.2em .6em; line-height: 1.25em;}
       @media (prefers-color-scheme: dark) {
-        body { color: White; background: #222; }
-        a { color: SkyBlue; }
-        a:visited { color: Plum; }
         .e { background-color: #333; }
         .z { color: #666; }
+        .u { color: White; }
+        body { color: White; background: #222; }
+        a { color: SkyBlue; }
+        a:visited, .s { color: #a7d; }
         summary { border-bottom: 1px solid #555; }
       }
       @media (max-width: 576px) {
@@ -62,12 +67,42 @@ template_start = '''<!doctype html>
       <h3>Ahoy There!</h3>
       <p>I'm CptSpaceToaster! This website is a personal project of mine that exposes categories, groups, products, and prices from TCGPlayer's API. The results are shared here for folks who can't get access to TCGPlayer's API. All responses used to generate the content on this website are cached as unmodified JSON text-files. The CSV's that I've put together DO have my personal affiliate links in there.</p>
       <p>All content <i>should</i> update daily.</p>
-      <p>You can see my terraform learnings, AWS infrastructure, and open source mess on <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv">Github</a></p>
+      <p>You can see my terraform learnings, AWS infrastructure, and open source mess for this website on <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv">Github</a></p>
       <p>You can join this <a target="_blank" rel="noopener noreferrer" href="">discord</a> to contact me, get updates, and talk about what would be cool to have next!</p>
       <p>If you would like to support this project, please consider using my <a href="https://cpt.tcgcsv.com">affiliate link</a> to help keep the lights on</p>
     </section>
-    <br>
+    <section>
+    <p>Q. Can I scrape this website?<br>
+    A. If the premade CSVs aren't quite what you need then go ahead! I would recommend processing the cached JSON files with any requests library.</p>
+    <pre><code><div><b>import</b> requests
+
+pokemon_category = <span class="s">&#39;3&#39;</span>
+
+r = requests.get(f<span class="s">&quot;https://tcgcsv.com/<span class="u">{pokemon_category}</span>/groups&quot;</span>)
+all_groups = r.json()[<span class="s">&#39;results&#39;</span>]
+
+<b>for</b> group <b>in</b> all_groups:
+    group_id = group[<span class="s">&#39;groupId&#39;</span>]
+    r = requests.get(f<span class="s">&quot;https://tcgcsv.com/<span class="u">{pokemon_category}</span>/<span class="u">{group_id}</span>/products&quot;</span>)
+    products = r.json()[<span class="s">&#39;results&#39;</span>]
+
+    <b>for</b> product <b>in</b> products:
+        <span class="c"># Process product information</span>
+        <b>print</b>(f<span class="s">&quot;<span class="u">{product[</span>&#39;productId&#39;<span class="u">]}</span> - <span class="u">{product[</span>&#39;name&#39;<span class="u">]}</span>&quot;</span>)
+
+    r = requests.get(f<span class="s">&quot;https://tcgcsv.com/<span class="u">{pokemon_category}</span>/<span class="u">{group_id}</span>/prices&quot;</span>)
+    prices = r.json()[<span class="s">&#39;results&#39;</span>]
+
+    <b>for</b> price <b>in</b> prices:
+        <span class="c"># Process prices</span>
+        <b>print</b>(f<span class="s">&quot;<span class="u">{price[</span>&#39;productId&#39;<span class="u">]}</span> - <span class="u">{price[</span>&#39;subTypeName&#39;<span class="u">]}</span> - <span class="u">{price[</span>&#39;midPrice&#39;<span class="u">]}</span>&quot;</span>)
+
+    <b>break</b> <span class="c"># Only process the first group and break for testing</span>
+
+</div></code></pre>
+    </section>
     <main>
+    <br>
 '''
 
 template_end = '''    </main>
