@@ -74,3 +74,6 @@ async def write_csv(client: aiohttp_s3_client.S3Client, filename: str, fieldname
             tries -= 1
             if tries == 0:
                 raise e
+
+async def write_txt(client: aiohttp_s3_client.S3Client, filename: str, text: str, content_type: str = 'text/plain'):
+    await client.put(filename, text, headers={'Content-Type': content_type})

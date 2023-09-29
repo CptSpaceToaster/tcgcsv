@@ -12,11 +12,11 @@ import boto3
 # Hacks to run locally if needed for testing
 try:
     from .tcgplayersdk import TCGPlayerSDK
-    from .csv_utils import write_json, write_csv
+    from .csv_utils import write_json, write_csv, write_txt
     from .shorten import shorten
 except ImportError:
     from tcgplayersdk import TCGPlayerSDK
-    from csv_utils import write_json, write_csv
+    from csv_utils import write_json, write_csv, write_txt
     from shorten import shorten
 
 
@@ -150,8 +150,9 @@ async def main(bucket_name, public_key, private_key, distribution_id):
         total_requests += len(category_group_pairs) * 2
         files_written += len(category_group_pairs) * 3
 
-    delta = time.time() - start
+        await write_txt(s3_client, 'last-updated.txt', time.strftime('%Y-%m-%dT%H:%M:%S%z', time.localtime()))
 
+    delta = time.time() - start
 
     cf.create_invalidation(
         DistributionId=distribution_id,

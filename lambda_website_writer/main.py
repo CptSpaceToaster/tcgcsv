@@ -25,8 +25,7 @@ template_start = '''<!doctype html>
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap">
     <style>
       .content-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; margin-bottom: 12px; }
       .links { margin-bottom: 2px; }
@@ -66,7 +65,11 @@ template_start = '''<!doctype html>
     <section>
       <h3>Ahoy There!</h3>
       <p>I'm CptSpaceToaster! This website is a personal project of mine that exposes categories, groups, products, and prices from TCGPlayer's API. The results are shared here for folks who can't get access to TCGPlayer's API. All responses used to generate the content on this website are cached as unmodified JSON text-files. The CSV's that I've put together DO have my personal affiliate links in there.</p>
-      <p>All content <i>should</i> update daily.</p>
+      <p>
+        All content <i>should</i> update daily at ~4pm EST (20:00:00 UTC).<br>
+        <div class="updated-at">Last updated at: </div>
+        <embed type="text/plain" src="last-updated.txt" height="44">
+      </p>
       <p>You can see my terraform learnings, AWS infrastructure, and open source mess for this website on <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv">Github</a></p>
       <p>You can join this <a target="_blank" rel="noopener noreferrer" href="">discord</a> to contact me, get updates, and talk about what would be cool to have next!</p>
       <p>If you would like to support this project, please consider using my <a href="https://cpt.tcgcsv.com">affiliate link</a> to help keep the lights on</p>
@@ -201,15 +204,16 @@ def process_objects(objs, bucket_name):
     }
 
     ignored_files = [
-        'index.html',
-        'manifest.webmanifest',
         'apple-touch-icon.png',
+        'discord-mark.svg',
         'favicon.ico',
+        'github-mark.svg',
         'icon-192.png',
         'icon-512.png',
         'icon.svg',
-        'github-mark.svg',
-        'discord-mark.svg',
+        'index.html',
+        'last-updated.txt',
+        'manifest.webmanifest',
         'TCGplayer-logo-primary.png',
     ]
 
@@ -229,7 +233,6 @@ def process_objects(objs, bucket_name):
                 written_data['categories_json'] = base
                 for json_line in smart_open.open(f's3://{bucket_name}/{base}', 'r'):
                     written_data['categories_results'] = json.loads(json_line)['results']
-
         else:
             group_or_category = int(os.path.basename(category_and_group))
             category = os.path.dirname(category_and_group)
@@ -249,7 +252,6 @@ def process_objects(objs, bucket_name):
                     written_data['categories'][group_or_category]['groups_json'] = f'{group_or_category}/{base}'
                     for json_line in smart_open.open(f's3://{bucket_name}/{group_or_category}/{base}', 'r'):
                         written_data['categories'][group_or_category]['groups_results'] = json.loads(json_line)['results']
-
             else:
                 # TODO: This default dictionary assertion stuff smells bad
                 # Ensure the category and group structure exist...
@@ -385,4 +387,6 @@ if __name__ == '__main__':
     # print(lambda_handler(None, None))
 
     # Do it small
+    with open('last-updated.txt', 'w') as f:
+        print(time.strftime('%Y-%m-%dT%H:%M:%S%z', time.localtime()), file=f)
     test_website_generation_locally()
