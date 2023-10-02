@@ -69,7 +69,7 @@ template_start = '''<!doctype html>
       <p>
         All content <i>should</i> update daily at ~4pm EST (20:00:00 UTC).<br>
         <div class="updated-at">Last updated at: </div>
-        <embed type="text/plain" src="last-updated.txt" height="44">
+        <embed type="text/plain" src="last-updated.txt" height="44" style="color-scheme:light dark;">
       </p>
       <p>You can see my terraform learnings, AWS infrastructure, and open source mess for this website on <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv">Github</a></p>
       <p>You can join this <a target="_blank" rel="noopener noreferrer" href="">discord</a> to contact me, get updates, and talk about what would be cool to have next!</p>
