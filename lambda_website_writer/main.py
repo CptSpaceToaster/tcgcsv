@@ -27,6 +27,7 @@ template_start = '''<!doctype html>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap">
     <style>
+      body { color: Black; background-color: White; }
       .content-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; margin-bottom: 12px; }
       .links { margin-bottom: 2px; }
       .e { background-color: #EEE; }
@@ -43,7 +44,7 @@ template_start = '''<!doctype html>
         .e { background-color: #333; }
         .z { color: #666; }
         .u { color: White; }
-        body { color: White; background: #222; }
+        body { color: White; background-color: #222; }
         a { color: SkyBlue; }
         a:visited, .s { color: #a7d; }
         summary { border-bottom: 1px solid #555; }
