@@ -1,6 +1,7 @@
 import os
+import urllib.parse
 
-affiliate_code = os.getenv('TCGCSV_AFFILIATE_CODE')
+impact_base_url = os.getenv('TCGCSV_IMPACT_AFFILIATE_BASE_URL')
 
 hesh_chars = '02356789bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ-_'
 BASE = len(hesh_chars)
@@ -13,12 +14,15 @@ def unb64ish(s: str) -> int:
         pwr += 1
     return r
 
+def generate_impact_affiliate_link(url='https://www.tcgplayer.com'):
+    return f'{impact_base_url}?u={urllib.parse.quote(url, safe="")}'
+
 def lambda_handler(event, context):
     if event.get('path') == '/':
         return {
             'statusCode': 302,
             'headers': {
-                'Location': f'https://www.tcgplayer.com?utm_campaign=affiliate&utm_source={affiliate_code}&utm_medium=tcgcsv'
+                'Location': generate_impact_affiliate_link()
             }
         }
 
@@ -34,6 +38,6 @@ def lambda_handler(event, context):
     return {
         'statusCode': 302,
         'headers': {
-            'Location': f'https://www.tcgplayer.com/product/{tcgplayer_id}?utm_campaign=affiliate&utm_source={affiliate_code}&utm_medium=tcgcsv'
+            'Location': generate_impact_affiliate_link(f'https://www.tcgplayer.com/product/{tcgplayer_id}')
         }
      }

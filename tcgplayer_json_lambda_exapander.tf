@@ -15,7 +15,7 @@ resource "aws_lambda_function" "tcgplayer_json_lambda_expander" {
 
   environment {
     variables = {
-      TCGCSV_AFFILIATE_CODE = "pkmntcgdecklist"
+      TCGCSV_IMPACT_AFFILIATE_BASE_URL = "https://tcgplayer.pxf.io/tcgcsv"
     }
   }
 }
