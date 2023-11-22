@@ -216,9 +216,12 @@ async def main(bucket_name, public_key, private_key, distribution_id):
         }
     )
 
+    status = f'{{"total_requests": {total_requests}, "files_written": {len(written_file_pairs)}, "time_elapsed": "{int(delta // 60)} minutes, {int(delta % 60)} seconds"}}'
+    print(status)
+
     return {
         'statusCode': 200,
-        'data': f'{{"total_requests": {total_requests}, "files_written": {len(written_file_pairs)}, "time_elapsed": "{int(delta // 60)} minutes, {int(delta % 60)} seconds"}}'
+        'data': status
     }
 
 
