@@ -9,6 +9,7 @@ charset-normalizer==3.2.0
 colorlog==6.7.0
 frozenlist==1.4.0
 idna==3.4
+merkle-json==1.0.0
 multidict==6.0.4
 smart-open==6.3.0
 urllib3==1.26.16

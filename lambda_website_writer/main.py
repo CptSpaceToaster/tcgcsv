@@ -216,6 +216,7 @@ def process_objects(objs, bucket_name):
         'last-updated.txt',
         'manifest.webmanifest',
         'TCGplayer-logo-primary.png',
+        'tcgplayer-manifest.txt',
     ]
 
     for obj in objs:

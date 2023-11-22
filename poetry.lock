@@ -474,6 +474,17 @@ files = [
 ]
 
 [[package]]
+name = "merkle-json"
+version = "1.0.0"
+description = "Generates an MD5 unique hash of an Json object"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "merkle-json-1.0.0.tar.gz", hash = "sha256:2deb0e78beeb5cd9b515853bdc82bad341fa92538efe460f0142318dc4c6919d"},
+    {file = "merkle_json-1.0.0-py3-none-any.whl", hash = "sha256:832a626f0049e8de22b3096d6183100887e83bfabf238a64e1107ac1efa8499e"},
+]
+
+[[package]]
 name = "multidict"
 version = "6.0.4"
 description = "multidict implementation"
@@ -725,4 +736,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "aa95046dbbc7ea80b33168cd39e6f5e59d6d0cb420d1aae9a68f8d7ce3d852c6"
+content-hash = "855f071b42ac6c0c117cba98fb468521a3b75177f978c30cdc8650adb4bfa8a6"

@@ -61,6 +61,16 @@ AWS_SHARED_CREDENTIALS_FILE='~/.aws/personal_credentials' aws lambda invoke --re
 AWS_SHARED_CREDENTIALS_FILE='~/.aws/personal_credentials' aws lambda invoke --region=us-east-1 --function-name=tcgplayer_csv_writer output.txt
 ```
 
+To install a package and update the lambda layer:
+
+```
+cd lambda_support_layer
+pip install merkle-json -t ./python
+pip freeze --path ./python > requirements.txt
+cd ..
+make lambda_support_layer/layer.zip
+```
+
 https://cpt.tcgcsv.com/JC63 should redirect to "Bingo" https://www.tcgplayer.com/product/261484
 
 We can store files in S3 and serve them through cloudfront now!

@@ -12,6 +12,7 @@ smart-open = "^6.3.0"
 asyncio = "^3.4.3"
 aiohttp = "^3.8.5"
 aiohttp-s3-client = "^0.9.3"
+merkle-json = "^1.0.0"
 
 
 [build-system]

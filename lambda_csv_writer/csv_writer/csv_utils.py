@@ -77,3 +77,10 @@ async def write_csv(client: aiohttp_s3_client.S3Client, filename: str, fieldname
 
 async def write_txt(client: aiohttp_s3_client.S3Client, filename: str, text: str, content_type: str = 'text/plain'):
     await client.put(filename, text, headers={'Content-Type': content_type})
+
+async def read_json(client: aiohttp_s3_client.S3Client, filename: str):
+    async with client.get(filename) as response:
+        if response.status == 200:
+            return json.loads(await response.read())
+        else:
+            return None
