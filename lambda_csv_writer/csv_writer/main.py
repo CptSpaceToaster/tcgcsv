@@ -205,16 +205,29 @@ async def main(bucket_name, public_key, private_key, distribution_id):
 
     delta = time.time() - start
 
-    cf.create_invalidation(
-        DistributionId=distribution_id,
-        InvalidationBatch={
-            'Paths': {
-                'Quantity': len(written_file_pairs),
-                'Items': written_file_pairs,
-            },
-            'CallerReference': str(time.time()).replace(".", "")
-        }
-    )
+
+    if len(written_file_pairs) < 1000:
+        cf.create_invalidation(
+            DistributionId=distribution_id,
+            InvalidationBatch={
+                'Paths': {
+                    'Quantity': len(written_file_pairs),
+                    'Items': written_file_pairs,
+                },
+                'CallerReference': str(time.time()).replace(".", "")
+            }
+        )
+    else:
+        cf.create_invalidation(
+            DistributionId=distribution_id,
+            InvalidationBatch={
+                'Paths': {
+                    'Quantity': 1,
+                    'Items': ['/*'],
+                },
+                'CallerReference': str(time.time()).replace(".", "")
+            }
+        )
 
     return {
         'statusCode': 200,
