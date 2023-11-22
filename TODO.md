@@ -1,0 +1,2 @@
+- Read through the README again on that note
+- Consider documenting how to get the python venv environment up and running
