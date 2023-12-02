@@ -34,7 +34,7 @@ def overwriteURL(product):
         product['url'] = shorten(product['productId'])
 
 
-async def main(bucket_name, public_key, private_key, distribution_id):
+async def main(bucket_name, public_key, private_key, distribution_id, discord_webhook):
     start = time.time()
 
     written_file_pairs = []
@@ -60,13 +60,19 @@ async def main(bucket_name, public_key, private_key, distribution_id):
         )
 
         # Collect manifest
-
         manifest = await read_json(s3_client, tcgplayer_manifest_filename)
         if manifest is None:
             manifest = {}
 
-        # TODO: Verify if I can just call list.append() in an asyncio loop, or if I should be gathering results
         written_file_pairs = []
+        new_files = []
+        seen_files = []
+
+        def establish_file_state(filename):
+            if manifest.get(filename) is None:
+                new_files.append(filename)
+            else:
+                seen_files.append(filename)
 
         # Initialize TCGPlayerSDK
         tcgplayer = TCGPlayerSDK(session, public_key, private_key)
@@ -79,6 +85,7 @@ async def main(bucket_name, public_key, private_key, distribution_id):
         categories_hash = mj.hash(categories_response)
         categories = categories_response['results']
 
+        establish_file_state(categories_json_filename)
         if categories_hash != manifest.get(categories_json_filename):
             manifest[categories_json_filename] = categories_hash
 
@@ -113,6 +120,7 @@ async def main(bucket_name, public_key, private_key, distribution_id):
                 if len(groups) == 0: # Apparently categories can exist without groups (rarely)
                     return
 
+                establish_file_state(groups_json_filename)
                 if groups_hash != manifest.get(groups_json_filename):
                     manifest[groups_json_filename] = groups_hash
 
@@ -121,6 +129,8 @@ async def main(bucket_name, public_key, private_key, distribution_id):
 
                     await write_csv(s3_client, groups_csv_filename, groups[0].keys(), groups)
                     written_file_pairs.append(groups_csv_filename)
+
+
 
         # TODO: Is there any way I can start the second process without blocking here like before with threads?
         await asyncio.gather(*(
@@ -144,19 +154,20 @@ async def main(bucket_name, public_key, private_key, distribution_id):
                 products_hash = mj.hash(products_response)
                 prices_hash = mj.hash(prices_response)
 
-                if products_hash != manifest.get(products_json_filename):
-                    manifest[products_json_filename] = products_hash
-
-                    await write_json(s3_client, products_json_filename, products_response)
-                    written_file_pairs.append(products_json_filename)
-
-                if prices_hash != manifest.get(prices_json_filename):
-                    manifest[prices_json_filename] = prices_hash
-
-                    await write_json(s3_client, prices_json_filename, prices_response)
-                    written_file_pairs.append(prices_json_filename)
-
+                establish_file_state(products_json_filename)
+                establish_file_state(prices_json_filename)
                 if products_hash != manifest.get(products_json_filename) or prices_hash != manifest.get(prices_json_filename):
+                    if products_hash != manifest.get(products_json_filename):
+                        manifest[products_json_filename] = products_hash
+
+                        await write_json(s3_client, products_json_filename, products_response)
+                        written_file_pairs.append(products_json_filename)
+
+                    if prices_hash != manifest.get(prices_json_filename):
+                        manifest[prices_json_filename] = prices_hash
+
+                        await write_json(s3_client, prices_json_filename, prices_response)
+                        written_file_pairs.append(prices_json_filename)
                     products = products_response['results']
                     prices = prices_response['results']
 
@@ -203,6 +214,34 @@ async def main(bucket_name, public_key, private_key, distribution_id):
         await write_txt(s3_client, '/last-updated.txt', time.strftime('%Y-%m-%dT%H:%M:%S%z', time.localtime()))
         written_file_pairs.append('/last-updated.txt')
 
+
+        # Post results to discord
+        print("new files ##########################")
+        for filename in new_files:
+            print(filename)
+
+        print("removed files ##########################")
+        removed_files = [filename for filename in manifest if filename not in seen_files]
+        for filename in removed_files:
+            print(filename)
+
+        if len(new_files) or len(removed_files):
+            embeds = []
+            if len(new_files):
+                embeds.append({
+                    "title": "Added Files",
+                    "color": 65280,
+                    "description": '\n'.join(new_files)
+                })
+            if len(removed_files):
+                embeds.append({
+                    "title": "Removed Files",
+                    "color": 16711680,
+                    "description": '\n'.join(removed_files)
+                })
+
+            await session.post(discord_webhook, json={"embeds": embeds})
+
     delta = time.time() - start
 
     cf.create_invalidation(
@@ -231,9 +270,10 @@ def lambda_handler(event, context):
     public_key = os.getenv('TCGPLAYER_PUBLIC_KEY')
     private_key = os.getenv('TCGPLAYER_PRIVATE_KEY')
     distribution_id = os.getenv('TCGCSV_DISTRIBUTION_ID')
+    discord_webhook = os.getenv('TCGCSV_DISCORD_WEBHOOK')
 
     response = asyncio.run(
-        main(bucket_name, public_key, private_key, distribution_id)
+        main(bucket_name, public_key, private_key, distribution_id, discord_webhook)
     )
 
     return response
@@ -246,9 +286,10 @@ if __name__ == '__main__':
     public_key = os.getenv('TF_VAR_TCGPLAYER_PUBLIC_KEY')
     private_key = os.getenv('TF_VAR_TCGPLAYER_PRIVATE_KEY')
     distribution_id = os.getenv('TCGCSV_DISTRIBUTION_ID')
+    discord_webhook = os.getenv('TF_VAR_TCGCSV_DISCORD_WEBHOOK')
 
     response = asyncio.run(
-        main(bucket_name, public_key, private_key, distribution_id)
+        main(bucket_name, public_key, private_key, distribution_id, discord_webhook)
     )
 
     with open('local.txt', 'w') as f:

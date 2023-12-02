@@ -6,6 +6,10 @@ variable "TCGPLAYER_PRIVATE_KEY" {
     type = string
 }
 
+variable "TCGCSV_DISCORD_WEBHOOK" {
+    type = string
+}
+
 resource "aws_lambda_layer_version" "lambda_support_layer" {
   filename   = "lambda_support_layer/layer.zip"
   source_code_hash = filebase64sha256("lambda_support_layer/layer.zip")
@@ -34,6 +38,7 @@ resource "aws_lambda_function" "tcgplayer_json_lambda_csv_writer" {
       TCGPLAYER_PRIVATE_KEY = var.TCGPLAYER_PRIVATE_KEY
       TCGCSV_SHORTEN_DOMAIN = "https://${aws_apigatewayv2_domain_name.cpt.domain_name}"
       TCGCSV_DISTRIBUTION_ID = aws_cloudfront_distribution.s3_distribution.id
+      TCGCSV_DISCORD_WEBHOOK = var.TCGCSV_DISCORD_WEBHOOK
     }
   }
 }
