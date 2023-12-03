@@ -1,6 +1,7 @@
 import os
 import time
 import copy
+import json
 from merkle_json import MerkleJson
 
 import asyncio
@@ -214,30 +215,26 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
         await write_txt(s3_client, '/last-updated.txt', time.strftime('%Y-%m-%dT%H:%M:%S%z', time.localtime()))
         written_file_pairs.append('/last-updated.txt')
 
-
         # Post results to discord
-        print("new files ##########################")
-        for filename in new_files:
-            print(filename)
-
-        print("removed files ##########################")
         removed_files = [filename for filename in manifest if filename not in seen_files]
-        for filename in removed_files:
-            print(filename)
 
         if len(new_files) or len(removed_files):
             embeds = []
-            if len(new_files):
-                embeds.append({
-                    "title": "Added Files",
-                    "color": 65280,
-                    "description": '\n'.join(new_files)
-                })
             if len(removed_files):
+                print(f"{len(removed_files)} removed files")
+                print(json.dumps(removed_files))
                 embeds.append({
                     "title": "Removed Files",
                     "color": 16711680,
-                    "description": '\n'.join(removed_files)
+                    "description": '\n'.join(removed_files)[:4095]
+                })
+            if len(new_files):
+                print(f"{len(new_files)} new files")
+                print(json.dumps(new_files))
+                embeds.append({
+                    "title": "Added Files",
+                    "color": 65280,
+                    "description": '\n'.join(new_files)[:4095]
                 })
 
             await session.post(discord_webhook, json={"embeds": embeds})
@@ -255,7 +252,11 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
         }
     )
 
-    status = f'{{"total_requests": {total_requests}, "files_written": {len(written_file_pairs)}, "time_elapsed": "{int(delta // 60)} minutes, {int(delta % 60)} seconds"}}'
+    status = json.dumps({
+        "total_requests": total_requests,
+        "files_written": len(written_file_pairs),
+        "time_elapsed": f"{int(delta // 60)} minutes, {int(delta % 60)} seconds"}
+    )
     print(status)
 
     return {
