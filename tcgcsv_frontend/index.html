@@ -1,0 +1,231 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="TCGCSV"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="http://tcgcsv.com"/>
+    <meta property="og:description" content="TCGPlayer category, group, and product information updated daily"/>
+    <meta name="theme-color" content="#663399">
+    <title>TCGCSV</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap">
+    <style>
+      body { color: Black; background-color: White; }
+      .content-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; margin-bottom: 12px; }
+      .links { margin-bottom: 2px; }
+      .e { background-color: #EEE; }
+      .z { color: #AAA; }
+      .u { color: Black; }
+      .c { color: DarkSeaGreen; font-style: italic; }
+      a:visited, .s { color: #639; }
+      header { margin-right: 16px; display: grid; align-items: center; column-gap: 24px; grid-template-columns: 1fr min-content min-content min-content; }
+      header a img { height: 40px; }
+      summary { font-size: 24px; margin-bottom: 4px; border-bottom: 1px solid #000; }
+      summary, h1, h3 { font-family: 'Roboto Slab', serif; }
+      code div { overflow: auto; max-width: 720px; border: solid gray; border-width: 2px 2px 2px 12px; padding: .2em .6em; line-height: 1.25em; }
+      @media (prefers-color-scheme: dark) {
+        .e { background-color: #333; }
+        .z { color: #666; }
+        .u { color: White; }
+        body { color: White; background-color: #222; }
+        a { color: SkyBlue; }
+        a:visited, .s { color: #a7d; }
+        summary { border-bottom: 1px solid #555; }
+      }
+      @media (max-width: 576px) {
+        .content-grid { grid-template-columns: 1fr; }
+        header { grid-template-rows: min-content min-content; grid-template-columns: min-content min-content 1fr; }
+        header *:first-child { grid-column: span 3; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>TCGPlayer CSV & JSON&nbsp;Dumps</h1>
+      <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv"><img alt="Github Repo" src="/github-mark.svg"></a>
+      <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25"><img alt="Join Discord" src="/discord-mark.svg"></a>
+      <a target="_blank" rel="noopener noreferrer" href="https://cpt.tcgcsv.com"><img alt="TCGPlayer Affiliate Link" src="/TCGplayer-logo-primary.png"></a>
+    </header>
+    <section>
+      <h3>Ahoy There!</h3>
+      <p>This website is a personal project of mine that exposes categories, groups, products, and prices from TCGPlayer's API. The results are shared here for folks who can't get access to TCGPlayer's API. All responses used to generate the content on this website are cached as unmodified JSON text-files. The CSV's that I've put together DO have my personal affiliate links in there.</p>
+      <p>
+        All content <i>should</i> update daily at ~4pm EST (20:00:00 UTC).<br>
+        <div class="updated-at">Last updated at: </div>
+        <embed type="text/plain" src="last-updated.txt" height="44" style="color-scheme:light dark;">
+      </p>
+      <p>You can see my terraform learnings, AWS infrastructure, and open source mess for this website on <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv">Github</a></p>
+      <p>You can join this <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25">discord</a> to contact me, get updates, and talk about what would be cool to have next!</p>
+      <p>If you would like to support this project, please consider using my <a href="https://cpt.tcgcsv.com">affiliate link</a> to help keep the lights on</p>
+    </section>
+    <section>
+    <p>Q. Can I scrape this website?<br>
+    A. If the premade CSVs aren't quite what you need then go ahead! I would recommend processing the cached JSON files with any requests library.</p>
+    <pre><code><div><b>import</b> requests
+
+pokemon_category = <span class="s">&#39;3&#39;</span>
+
+r = requests.get(f<span class="s">&quot;https://tcgcsv.com/<span class="u">{pokemon_category}</span>/groups&quot;</span>)
+all_groups = r.json()[<span class="s">&#39;results&#39;</span>]
+
+<b>for</b> group <b>in</b> all_groups:
+    group_id = group[<span class="s">&#39;groupId&#39;</span>]
+    r = requests.get(f<span class="s">&quot;https://tcgcsv.com/<span class="u">{pokemon_category}</span>/<span class="u">{group_id}</span>/products&quot;</span>)
+    products = r.json()[<span class="s">&#39;results&#39;</span>]
+
+    <b>for</b> product <b>in</b> products:
+        <span class="c"># Process product information</span>
+        <b>print</b>(f<span class="s">&quot;<span class="u">{product[</span>&#39;productId&#39;<span class="u">]}</span> - <span class="u">{product[</span>&#39;name&#39;<span class="u">]}</span>&quot;</span>)
+
+    r = requests.get(f<span class="s">&quot;https://tcgcsv.com/<span class="u">{pokemon_category}</span>/<span class="u">{group_id}</span>/prices&quot;</span>)
+    prices = r.json()[<span class="s">&#39;results&#39;</span>]
+
+    <b>for</b> price <b>in</b> prices:
+        <span class="c"># Process prices</span>
+        <b>print</b>(f<span class="s">&quot;<span class="u">{price[</span>&#39;productId&#39;<span class="u">]}</span> - <span class="u">{price[</span>&#39;subTypeName&#39;<span class="u">]}</span> - <span class="u">{price[</span>&#39;midPrice&#39;<span class="u">]}</span>&quot;</span>)
+
+    <b>break</b> <span class="c"># Only process the first group and break for testing</span>
+
+  </div></code></pre>
+    </section>
+    <main id="info">
+      <div class="content-grid">
+        <span>All Categories</span>
+        <div class="links">
+          <a target="_blank" rel="noopener noreferrer" href="categories">Categories</a>
+          <a href="Categories.csv">Categories.csv</a>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <p>With special thanks to our friends:</p>
+      <ul>
+        <li>luceleaftea for maintaining a separate pile of CSVs on <a target="_blank" rel="noopener noreferrer" href="https://github.com/the-fab-cube/flesh-and-blood-cards">Github</a> for Flesh and Blood</li>
+        <li>nago for hosting a wonderful pile of pokemon related assets over at <a target="_blank" rel="noopener noreferrer" href="https://malie.io/static/">Malie.io</a></li>
+        <li>ZeldaZach for helping answer questions in TCGPlayer's discord with me, while also maintaining <a target="_blank" rel="noopener noreferrer" href="https://mtgjson.com">MTGJSON.com</a></li>
+        <li>And viewers like you!</li>
+      </ul>
+    </footer>
+  </body>
+  <script>
+    function addLinkLine(grid, title, f1, h1, f2, h2, f3, h3, even, f3Download) {
+      const groupsSpan = document.createElement('span');
+      groupsSpan.innerHTML = title;
+      if (even) groupsSpan.classList.add('e');
+      grid.appendChild(groupsSpan);
+
+      const links = document.createElement('div');
+      links.classList.add('links');
+      if (even) links.classList.add('e');
+
+      const a1 = document.createElement('a');
+      a1.innerHTML = f1;
+      a1.target = '_blank';
+      a1.rel = 'noopener noreferrer';
+      a1.href = h1;
+      links.appendChild(a1);
+      links.appendChild(document.createTextNode(" "));
+
+      if (f2) {
+        const a2 = document.createElement('a');
+        a2.innerHTML = f2;
+        a2.target = '_blank';
+        a2.rel = 'noopener noreferrer';
+        a2.href = h2;
+        links.appendChild(a2);
+        links.appendChild(document.createTextNode(" "));
+      }
+
+      const a3 = document.createElement('a');
+      a3.innerHTML = f3;
+      a3.href = h3;
+      a3.download = f3Download;
+      links.appendChild(a3);
+
+      grid.appendChild(links);
+    }
+
+    async function addCategory(parent, category) {
+      if (category.categoryId === 21) return;
+
+      const detail = document.createElement('details');
+      parent.appendChild(detail);
+
+      let groups;
+      let groupsLength = 0
+      if (![69, 70].includes(category.categoryId)) {
+        const groupsResponse = await fetch(`${category.categoryId}/groups`);
+        groups = (await groupsResponse.json()).results;
+        groups.sort((a, b) => {
+          return a.groupId - b.groupId;
+        });
+        groupsLength = groups.length
+      }
+
+      const summary = document.createElement('summary');
+      summary.innerHTML = `${category.name} (${groupsLength})`;
+      if (groupsLength === 0) summary.classList.add('z');
+
+      const contentGrid = document.createElement('div');
+      contentGrid.classList.add('content-grid');
+
+      const safeCategoryName = category.name.replaceAll('&', 'And').replaceAll(' ', '')
+      addLinkLine(contentGrid,
+        'Groups',
+        'Groups',
+        `${category.categoryId}/groups`,
+        null,
+        null,
+        'Groups.csv',
+        `${category.categoryId}/Groups.csv`,
+        false,
+        `${safeCategoryName}Groups.csv`,
+      );
+
+      if (groupsLength) {
+        let even = true;
+        groups.forEach((group) => {
+          const safeGroupName = group.name.replaceAll('&', 'And').replaceAll(' ', '').replaceAll(':', '').replaceAll('.', '').replaceAll('/', '-')
+          addLinkLine(
+            contentGrid,
+            group.name,
+            'Products',
+            `${category.categoryId}/${group.groupId}/products`,
+            'Prices',
+            `${category.categoryId}/${group.groupId}/prices`,
+            'ProductsAndPrices.csv',
+            `${category.categoryId}/${group.groupId}/ProductsAndPrices.csv`,
+            even,
+            `${safeGroupName}ProductsAndPrices.csv`,
+          );
+          even = !even;
+        });
+      }
+
+      detail.appendChild(summary);
+      detail.appendChild(contentGrid);
+    }
+
+
+    async function load() {
+      const categoriesResponse = await fetch("categories");
+      const categories = (await categoriesResponse.json()).results;
+      categories.sort((a, b) => {
+        return a.categoryId - b.categoryI;
+      });
+
+      main = document.getElementById('info');
+
+      categories.forEach((category) => {
+        addCategory(main, category);
+      });
+    }
+    load();
+  </script>
+</html>
