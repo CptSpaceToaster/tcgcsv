@@ -1,15 +1,10 @@
 .PHONY: bundles
-bundles: lambda_expander/bundle.zip lambda_csv_writer/bundle.zip lambda_website_writer/bundle.zip lambda_support_layer/layer.zip
+bundles: lambda_expander/bundle.zip lambda_csv_writer/bundle.zip lambda_support_layer/layer.zip
 	terraform apply
 
 .PHONY: csv
 csv: bundles
 	AWS_SHARED_CREDENTIALS_FILE='~/.aws/personal_credentials' aws lambda invoke --region=us-east-1 --function-name=tcgplayer_csv_writer --cli-read-timeout 0 output.txt
-	cat output.txt
-
-.PHONY: web
-web: bundles
-	AWS_SHARED_CREDENTIALS_FILE='~/.aws/personal_credentials' aws lambda invoke --region=us-east-1 --function-name=tcgcsv_website_writer --cli-read-timeout 0 output.txt
 	cat output.txt
 
 lambda_support_layer/layer.zip: lambda_support_layer/requirements.txt
@@ -26,4 +21,3 @@ lambda_support_layer/layer.zip: lambda_support_layer/requirements.txt
 clean:
 	rm lambda_expander/bundle.zip
 	rm lambda_csv_writer/bundle.zip
-	rm lambda_website_writer/bundle.zip
