@@ -82,7 +82,7 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
         total_requests += 1
         categories_response = await tcgplayer.get_categories()
         categories_json_filename = '/categories'
-        categories_csv_filename = '/categories.csv'
+        categories_csv_filename = '/Categories.csv'
         categories_hash = mj.hash(categories_response)
         categories = categories_response['results']
 
@@ -101,17 +101,15 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
         category_group_pairs = []
 
         async def process_category(category):
-            category_name = category['name']
             category_id = category['categoryId']
 
             if category_id in [21]: # Ignore the duplicate (and empty) "My Little Pony" group all-together
                 return
 
-            safe_category_name = category_name.replace('&', 'And').replace(' ', '')
             async with semaphore:
                 groups_response = await tcgplayer.get_groups(category_id)
                 groups_json_filename = f'/{category_id}/groups'
-                groups_csv_filename = f'/{category_id}/{safe_category_name}Groups.csv'
+                groups_csv_filename = f'/{category_id}/Groups.csv'
                 groups_hash = mj.hash(groups_response)
                 groups = groups_response['results']
 
@@ -132,7 +130,6 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
                     written_file_pairs.append(groups_csv_filename)
 
 
-
         # TODO: Is there any way I can start the second process without blocking here like before with threads?
         await asyncio.gather(*(
             asyncio.ensure_future(
@@ -145,13 +142,12 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
         async def process_group(category_id, group):
             group_id = group['groupId']
 
-            safe_group_name = group['name'].replace('&', 'And').replace(' ', '').replace(':', '').replace('.', '').replace('/', '-')
             async with semaphore:
                 products_response = await tcgplayer.get_products_for_group(group_id)
                 prices_response = await tcgplayer.get_prices_for_group(group_id)
                 products_json_filename = f'/{category_id}/{group_id}/products'
                 prices_json_filename = f'/{category_id}/{group_id}/prices'
-                products_and_prices_csv_filename = f'/{category_id}/{group_id}/{safe_group_name}ProductsAndPrices.csv'
+                products_and_prices_csv_filename = f'/{category_id}/{group_id}/ProductsAndPrices.csv'
                 products_hash = mj.hash(products_response)
                 prices_hash = mj.hash(prices_response)
 
@@ -239,6 +235,9 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
 
             await session.post(discord_webhook, json={"embeds": embeds})
 
+            # TODO: Remove files
+            # for filename in removed_files:
+
     delta = time.time() - start
 
     cf.create_invalidation(
@@ -292,6 +291,3 @@ if __name__ == '__main__':
     response = asyncio.run(
         main(bucket_name, public_key, private_key, distribution_id, discord_webhook)
     )
-
-    with open('local.txt', 'w') as f:
-        f.write(str(response['data']))
