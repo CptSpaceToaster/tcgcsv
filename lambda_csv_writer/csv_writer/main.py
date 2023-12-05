@@ -212,7 +212,7 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
         written_file_pairs.append('/last-updated.txt')
 
         # Post results to discord
-        removed_files = [filename for filename in manifest if filename not in seen_files]
+        removed_files = [filename for filename in manifest if filename not in seen_files and filename not in new_files]
 
         if len(new_files) or len(removed_files):
             embeds = []
