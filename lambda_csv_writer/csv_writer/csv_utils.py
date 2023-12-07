@@ -37,10 +37,7 @@ async def write_json(client: aiohttp_s3_client.S3Client, filename: str, results:
             if tries == 0:
                 raise e
 
-async def write_csv(client: aiohttp_s3_client.S3Client, filename: str, fieldnames: List[str], results: dict, suggested_filename='', content_type: str = 'text/csv'):
-    if suggested_filename == '' or suggested_filename is None:
-        suggested_filename = filename
-
+async def write_csv(client: aiohttp_s3_client.S3Client, filename: str, fieldnames: List[str], results: dict, suggested_filename, content_type: str = 'text/csv'):
     def csv_sender(results: dict, fieldnames: List[str], chunk_size: int):
         with io.BytesIO() as buffer:
             # CSV writer needs to write strings. TextIOWrapper gets us back to bytes

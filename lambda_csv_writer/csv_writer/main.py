@@ -93,7 +93,7 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
             await write_json(s3_client, categories_json_filename, categories_response)
             written_file_pairs.append(categories_json_filename)
 
-            await write_csv(s3_client, categories_csv_filename, categories[0].keys(), categories)
+            await write_csv(s3_client, categories_csv_filename, categories[0].keys(), categories, 'Categories.csv')
             written_file_pairs.append(categories_csv_filename)
 
         semaphore = asyncio.Semaphore(MAX_CONCURRENCY)
