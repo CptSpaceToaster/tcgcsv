@@ -112,6 +112,7 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
                 groups_csv_filename = f'/{category_id}/Groups.csv'
                 groups_hash = mj.hash(groups_response)
                 groups = groups_response['results']
+                suggested_csv_name = f"{category['name'].replace('&', 'And').replace(' ', '')}Groups.csv"
 
                 if category_id not in [69, 70]: # Marvel & DC Comics seem to ONLY have empty product lists... and filtering them here saves a bundle of time and energy
                     category_group_pairs.extend([(category_id, group) for group in groups])
@@ -126,7 +127,7 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
                     await write_json(s3_client, groups_json_filename, groups_response)
                     written_file_pairs.append(groups_json_filename)
 
-                    await write_csv(s3_client, groups_csv_filename, groups[0].keys(), groups)
+                    await write_csv(s3_client, groups_csv_filename, groups[0].keys(), groups, suggested_csv_name)
                     written_file_pairs.append(groups_csv_filename)
 
 
@@ -150,6 +151,7 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
                 products_and_prices_csv_filename = f'/{category_id}/{group_id}/ProductsAndPrices.csv'
                 products_hash = mj.hash(products_response)
                 prices_hash = mj.hash(prices_response)
+                suggested_csv_name = f"{group['name'].replace('&', 'And').replace(' ', '').replace(':', '').replace('.', '').replace('/', '-')}ProductsAndPrices.csv"
 
                 establish_file_state(products_json_filename)
                 establish_file_state(prices_json_filename)
@@ -194,7 +196,7 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
                             if key not in fieldnames:
                                 fieldnames.append(key)
 
-                    await write_csv(s3_client, products_and_prices_csv_filename, fieldnames, products_to_write)
+                    await write_csv(s3_client, products_and_prices_csv_filename, fieldnames, products_to_write, suggested_csv_name)
                     written_file_pairs.append(products_and_prices_csv_filename)
 
         await asyncio.gather(*(

@@ -37,7 +37,10 @@ async def write_json(client: aiohttp_s3_client.S3Client, filename: str, results:
             if tries == 0:
                 raise e
 
-async def write_csv(client: aiohttp_s3_client.S3Client, filename: str, fieldnames: List[str], results: dict, content_type: str = 'text/csv'):
+async def write_csv(client: aiohttp_s3_client.S3Client, filename: str, fieldnames: List[str], results: dict, suggested_filename='', content_type: str = 'text/csv'):
+    if suggested_filename == '' or suggested_filename is None:
+        suggested_filename = filename
+
     def csv_sender(results: dict, fieldnames: List[str], chunk_size: int):
         with io.BytesIO() as buffer:
             # CSV writer needs to write strings. TextIOWrapper gets us back to bytes
@@ -66,7 +69,7 @@ async def write_csv(client: aiohttp_s3_client.S3Client, filename: str, fieldname
                     fieldnames,
                     chunk_size=PART_SIZE,
                 ),
-                headers={'Content-Type': content_type},
+                headers={'Content-Type': content_type, 'Content-Disposition': f'attachment; filename="{suggested_filename}"'},
                 part_upload_tries=20,
             )
             running = False
