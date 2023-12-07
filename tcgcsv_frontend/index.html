@@ -113,7 +113,7 @@ all_groups = r.json()[<span class="s">&#39;results&#39;</span>]
     </footer>
   </body>
   <script>
-    function addLinkLine(grid, title, f1, h1, f2, h2, f3, h3, even, f3Download) {
+    function addLinkLine(grid, title, f1, h1, f2, h2, f3, h3, even) {
       const groupsSpan = document.createElement('span');
       groupsSpan.innerHTML = title;
       if (even) groupsSpan.classList.add('e');
@@ -144,7 +144,6 @@ all_groups = r.json()[<span class="s">&#39;results&#39;</span>]
       const a3 = document.createElement('a');
       a3.innerHTML = f3;
       a3.href = h3;
-      a3.download = f3Download;
       links.appendChild(a3);
 
       grid.appendChild(links);
@@ -184,7 +183,6 @@ all_groups = r.json()[<span class="s">&#39;results&#39;</span>]
         'Groups.csv',
         `${category.categoryId}/Groups.csv`,
         false,
-        `${safeCategoryName}Groups.csv`,
       );
 
       if (groupsLength) {
@@ -201,7 +199,6 @@ all_groups = r.json()[<span class="s">&#39;results&#39;</span>]
             'ProductsAndPrices.csv',
             `${category.categoryId}/${group.groupId}/ProductsAndPrices.csv`,
             even,
-            `${safeGroupName}ProductsAndPrices.csv`,
           );
           even = !even;
         });
