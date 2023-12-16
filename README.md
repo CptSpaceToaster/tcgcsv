@@ -80,4 +80,4 @@ We can store files in S3 and serve them through cloudfront now!
   - https://tcgcsv.com/1/groups.csv
   - https://tcgcsv.com/1/1/products
   - https://tcgcsv.com/1/1/prices
-  - https://tcgcsv.com/1/1/10thEditionProductsAndPrices.csv
+  - https://tcgcsv.com/1/1/ProductsAndPrices.csv
