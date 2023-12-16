@@ -2,8 +2,11 @@ import os
 import time
 import copy
 import json
-from merkle_json import MerkleJson
 
+from http import HTTPStatus
+from itertools import groupby
+
+from merkle_json import MerkleJson
 import asyncio
 import aiohttp
 from aiohttp_s3_client import S3Client
@@ -207,13 +210,7 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
 
         total_requests += len(category_group_pairs) * 2
 
-        await write_json(s3_client, tcgplayer_manifest_filename, manifest)
-        written_file_pairs.append(tcgplayer_manifest_filename)
-
-        await write_txt(s3_client, '/last-updated.txt', time.strftime('%Y-%m-%dT%H:%M:%S%z', time.localtime()))
-        written_file_pairs.append('/last-updated.txt')
-
-        # Post results to discord
+        # Post changes to discord
         removed_files = [filename for filename in manifest if filename not in seen_files and filename not in new_files]
 
         if len(new_files) or len(removed_files):
@@ -237,8 +234,21 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
 
             await session.post(discord_webhook, json={"embeds": embeds})
 
-            # TODO: Remove files
-            # for filename in removed_files:
+            # Remove files from manifest and bucket
+            removed_files.sort()
+            for group, items in groupby(removed_files, lambda x: "/".join(x.split("/", 3)[:3])):
+                for item in items:
+                    del manifest[item]
+                    async with s3_client.delete(item) as resp:
+                        assert resp == HTTPStatus.NO_CONTENT
+                async with s3_client.delete(f'{group}/ProductsAndPrices.csv') as resp:
+                    assert resp == HTTPStatus.NO_CONTENT
+
+        await write_json(s3_client, tcgplayer_manifest_filename, manifest)
+        written_file_pairs.append(tcgplayer_manifest_filename)
+
+        await write_txt(s3_client, '/last-updated.txt', time.strftime('%Y-%m-%dT%H:%M:%S%z', time.localtime()))
+        written_file_pairs.append('/last-updated.txt')
 
     delta = time.time() - start
 

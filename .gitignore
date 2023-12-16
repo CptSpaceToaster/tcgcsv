@@ -45,3 +45,5 @@ output.txt
 
 .venv/
 last-updated.txt
+
+.DS_Store
