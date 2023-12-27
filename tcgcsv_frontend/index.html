@@ -56,7 +56,7 @@
       <h3>Ahoy There!</h3>
       <p>This website is a personal project of mine that exposes categories, groups, products, and prices from TCGPlayer's API. The results are shared here for folks who can't get access to TCGPlayer's API. All responses used to generate the content on this website are cached as unmodified JSON text-files. The CSV's that I've put together DO have my personal affiliate links in there.</p>
       <p>
-        <div id="schedule">All content <i>should</i> update daily around </div>
+        <div id="schedule">All content <i>should</i> update daily around 20:00:00 UTC</div>
         <div id="updated-at">Last updated at: </div>
       </p>
       <p>You can see my terraform learnings, AWS infrastructure, and open source mess for this website on <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv">Github</a></p>
@@ -210,25 +210,8 @@ all_groups = r.json()[<span class="s">&#39;results&#39;</span>]
 
 
     async function load() {
-      schedule = document.getElementById('schedule');
       updated = document.getElementById('updated-at');
-
-      const scheduleDate = new Date();
-      scheduleDate.setUTCHours(20);
-      scheduleDate.setUTCMinutes(0);
-      scheduleDate.setUTCSeconds(0);
-
       const lastUpdatedDate = new Date((await (await fetch("last-updated.txt")).text()).trim());
-
-      scheduleOptions = {
-        year: undefined,
-        month: undefined,
-        day: undefined,
-        hour: "numeric",
-        minute: "numeric",
-        second: "numeric",
-        timeZoneName: "short",
-      }
 
       timestampOptions = {
         year: "numeric",
@@ -241,7 +224,6 @@ all_groups = r.json()[<span class="s">&#39;results&#39;</span>]
       }
 
       // Get current locale
-      schedule.appendChild(document.createTextNode(scheduleDate.toLocaleString('en-US', scheduleOptions)));
       updated.appendChild(document.createTextNode(lastUpdatedDate.toLocaleString('en-US', timestampOptions)));
 
       const categoriesResponse = await fetch("categories");
