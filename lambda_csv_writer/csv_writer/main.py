@@ -235,14 +235,21 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
             await session.post(discord_webhook, json={"embeds": embeds})
 
             # Remove files from manifest and bucket
+            had_trouble_deleting = {}
             removed_files.sort()
             for group, items in groupby(removed_files, lambda x: "/".join(x.split("/", 3)[:3])):
                 for item in items:
-                    del manifest[item]
                     async with s3_client.delete(item) as resp:
-                        assert resp == HTTPStatus.NO_CONTENT
+                        if resp.status != HTTPStatus.NO_CONTENT:
+                            had_trouble_deleting.append[item] = resp.status
+                        else:
+                            del manifest[item]
                 async with s3_client.delete(f'{group}/ProductsAndPrices.csv') as resp:
-                    assert resp == HTTPStatus.NO_CONTENT
+                    if resp.status != HTTPStatus.NO_CONTENT:
+                        had_trouble_deleting.append[f'{group}/ProductsAndPrices.csv'] = resp.status
+
+            print(f"Had trouble deleting {len(had_trouble_deleting)} files:")
+            print(json.dumps(had_trouble_deleting))
 
         await write_json(s3_client, tcgplayer_manifest_filename, manifest)
         written_file_pairs.append(tcgplayer_manifest_filename)
