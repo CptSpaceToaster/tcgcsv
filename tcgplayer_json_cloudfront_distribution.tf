@@ -17,6 +17,28 @@ resource "aws_cloudfront_cache_policy" "vault_cache" {
   }
 }
 
+resource "aws_cloudfront_response_headers_policy" "allow_cors" {
+  name    = "allow-cors"
+
+  cors_config {
+    access_control_allow_credentials = true
+
+    access_control_allow_headers {
+      items = ["content-type"]
+    }
+
+    access_control_allow_methods {
+      items = ["GET", "OPTIONS"]
+    }
+
+    access_control_allow_origins {
+      items = ["*"]
+    }
+
+    origin_override = true
+  }
+}
+
 resource "aws_cloudfront_origin_access_control" "S3_OA" {
   name                              = "S3_OA"
   origin_access_control_origin_type = "s3"
@@ -40,6 +62,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
   default_cache_behavior {
     cache_policy_id = aws_cloudfront_cache_policy.vault_cache.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.allow_cors.id
     allowed_methods = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = local.s3_origin_id
@@ -59,6 +82,3 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     ssl_support_method = "sni-only"
   }
 }
-
-
-
