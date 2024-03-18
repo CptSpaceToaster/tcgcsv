@@ -24,7 +24,7 @@
       .u { color: Black; }
       .c { color: DarkSeaGreen; font-style: italic; }
       a:visited, .s { color: #639; }
-      header { margin-right: 16px; display: grid; align-items: center; column-gap: 24px; grid-template-columns: 1fr min-content min-content min-content; }
+      header { margin-right: 16px; display: grid; align-items: center; column-gap: 32px; grid-template-columns: 1fr repeat(4, min-content); }
       header a img { height: 40px; }
       summary { font-size: 24px; margin-bottom: 4px; border-bottom: 1px solid #000; }
       summary, h1, h3 { font-family: 'Roboto Slab', serif; }
@@ -40,8 +40,8 @@
       }
       @media (max-width: 576px) {
         .content-grid { grid-template-columns: 1fr; }
-        header { grid-template-rows: min-content min-content; grid-template-columns: min-content min-content 1fr; }
-        header *:first-child { grid-column: span 3; }
+        header { grid-template-rows: min-content min-content; grid-template-columns: min-content min-content min-content 1fr; }
+        header *:first-child { grid-column: span 4; }
       }
     </style>
   </head>
@@ -50,6 +50,7 @@
       <h1>TCGPlayer CSV & JSON&nbsp;Dumps</h1>
       <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv"><img alt="Github Repo" src="/github-mark.svg"></a>
       <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25"><img alt="Join Discord" src="/discord-mark.svg"></a>
+      <a target="_blank" rel="noopener noreferrer" href="https://www.patreon.com/TCGCSV"><img alt="Support me on Patreon!" src="/patreon-symbol-mark.svg"></a>
       <a target="_blank" rel="noopener noreferrer" href="https://cpt.tcgcsv.com"><img alt="TCGPlayer Affiliate Link" src="/TCGplayer-logo-primary.png"></a>
     </header>
     <section>
@@ -61,7 +62,7 @@
       </p>
       <p>You can see my terraform learnings, AWS infrastructure, and open source mess for this website on <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv">Github</a></p>
       <p>You can join this <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25">discord</a> to contact me, get updates, and talk about what would be cool to have next!</p>
-      <p>If you would like to support this project, please consider using my <a href="https://cpt.tcgcsv.com">affiliate link</a> to help keep the lights on</p>
+      <p>If you would like to support this project, you can become a member on <a href="https://www.patreon.com/TCGCSV">Patreon</a> to help keep the lights on!</p>
     </section>
     <section>
     <p>Q. Can I scrape this website?<br>
