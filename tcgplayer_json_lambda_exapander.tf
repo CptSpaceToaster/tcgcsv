@@ -11,7 +11,7 @@ resource "aws_lambda_function" "tcgplayer_json_lambda_expander" {
   # source_code_hash = "${base64sha256(file("lambda_function_payload.zip"))}"
   source_code_hash = filebase64sha256("lambda_expander/bundle.zip")
 
-  runtime = "python3.10"
+  runtime = "python3.11"
 
   environment {
     variables = {

@@ -2,6 +2,7 @@ import os
 import time
 import copy
 import json
+import io
 
 from http import HTTPStatus
 from itertools import groupby
@@ -11,17 +12,18 @@ import asyncio
 import aiohttp
 from aiohttp_s3_client import S3Client
 import boto3
+import py7zr
 
 # https://blog.jonlu.ca/posts/async-python-http
 
 # Hacks to run locally if needed for testing
 try:
     from .tcgplayersdk import TCGPlayerSDK
-    from .csv_utils import write_json, write_csv, write_txt, read_json
+    from .csv_utils import write_json, write_csv, write_txt, read_json, write_buffered_bytes
     from .shorten import shorten
 except ImportError:
     from tcgplayersdk import TCGPlayerSDK
-    from csv_utils import write_json, write_csv, write_txt, read_json
+    from csv_utils import write_json, write_csv, write_txt, read_json, write_buffered_bytes
     from shorten import shorten
 
 
@@ -46,7 +48,7 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
 
     tcgplayer_manifest_filename = '/tcgplayer-manifest.txt'
 
-    MAX_CONCURRENCY = 400
+    MAX_CONCURRENCY = 60
 
     cf = boto3.client('cloudfront')
 
@@ -62,6 +64,10 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
             secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
             session_token=os.getenv('AWS_SESSION_TOKEN'),
         )
+
+        archive7z_buffer = io.BytesIO()
+        ppmd_filters = [{"id": py7zr.FILTER_PPMD, 'order': 8, 'mem': 24}]
+        archive7z = py7zr.SevenZipFile(archive7z_buffer, 'w', filters=ppmd_filters)
 
         # Collect manifest
         manifest = await read_json(s3_client, tcgplayer_manifest_filename)
@@ -133,7 +139,6 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
                     await write_csv(s3_client, groups_csv_filename, groups[0].keys(), groups, suggested_csv_name)
                     written_file_pairs.append(groups_csv_filename)
 
-
         # TODO: Is there any way I can start the second process without blocking here like before with threads?
         await asyncio.gather(*(
             asyncio.ensure_future(
@@ -151,6 +156,7 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
                 prices_response = await tcgplayer.get_prices_for_group(group_id)
                 products_json_filename = f'/{category_id}/{group_id}/products'
                 prices_json_filename = f'/{category_id}/{group_id}/prices'
+                prices_json_archive_filename = f'{time.strftime("%Y-%m-%d", time.localtime())}/{category_id}/{group_id}/prices'
                 products_and_prices_csv_filename = f'/{category_id}/{group_id}/ProductsAndPrices.csv'
                 products_hash = mj.hash(products_response)
                 prices_hash = mj.hash(prices_response)
@@ -158,6 +164,11 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
 
                 establish_file_state(products_json_filename)
                 establish_file_state(prices_json_filename)
+
+                # Always include price in archive
+                with io.BytesIO(json.dumps(prices_response).encode('utf-8')) as buffer:
+                    archive7z.writef(buffer, prices_json_archive_filename)
+
                 if products_hash != manifest.get(products_json_filename) or prices_hash != manifest.get(prices_json_filename):
                     if products_hash != manifest.get(products_json_filename):
                         manifest[products_json_filename] = products_hash
@@ -170,6 +181,7 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
 
                         await write_json(s3_client, prices_json_filename, prices_response)
                         written_file_pairs.append(prices_json_filename)
+
                     products = products_response['results']
                     prices = prices_response['results']
 
@@ -209,6 +221,19 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
         ))
 
         total_requests += len(category_group_pairs) * 2
+
+
+        # Write price archive
+        archive7z.close()
+        price_archive_name = time.strftime('prices-%Y-%m-%d.ppmd.7z', time.localtime())
+        archive7z_buffer.seek(0)
+        await write_buffered_bytes(
+            s3_client,
+            archive7z_buffer,
+            f'archive/{price_archive_name}',
+            price_archive_name,
+        )
+        archive7z_buffer.close()
 
         # Post changes to discord
         removed_files = [filename for filename in manifest if filename not in seen_files and filename not in new_files]
