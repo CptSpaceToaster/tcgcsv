@@ -39,7 +39,7 @@
       <h2>Frequently Asked Questions</h2>
       <p>See something wrong or out of place? Reach out on <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25">discord</a> or submit an  <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv/issues">issue on Github</a> to ask a question or offer a correction!</p>
 
-      <h3 id="scraping"># Can I scrape this website?</h3>
+      <h3 id="scraping">Can I scrape this website?</h3>
       <p>If the premade CSVs aren't quite what you need then go ahead! It might make more sense to process the cached JSON files with any requests library directly.</p>
       <pre><code><div><b>import</b> requests
 
