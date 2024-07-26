@@ -12,49 +12,10 @@
     <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap">
-    <style>
-      body { color: Black; background-color: White; margin-inline: 16px; font-family: 'Arial', sans-serif; line-height:1.3; }
-      a:visited { color: #639; }
-
-      header { display: grid; grid-template-columns: 1fr min-content; column-gap: 8px; }
-      .external-nav { display: grid; align-items: center; grid-template-columns: repeat(4, min-content); column-gap: 32px; }
-      .external-nav a img { height: 40px; }
-
-      summary { font-size: 24px; margin-bottom: 4px; border-bottom: 1px solid #000; }
-      summary, h1, h3 { font-family: 'Roboto Slab', serif; }
-      .z { color: #AAA; }
-
-      table { display:grid; grid-template-columns: minmax(120px,9fr) minmax(120px,1fr) minmax(120px,10fr); margin-bottom: 16px; }
-      thead,tbody,tr { display: contents; }
-      th { position: sticky; top: 0; background: #DDD; text-align: left; padding-block: 8px; }
-      td { padding-block: 6px; }
-      td:last-child { padding-bottom: 4px; }
-      tr:nth-child(even) td { background: #EEE; }
-
-      @media (prefers-color-scheme: dark) {
-        body { color: White; background-color: #222; }
-        a { color: SkyBlue; }
-        a:visited, .s { color: #a7d; }
-
-        summary { border-bottom: 1px solid #555; }
-        .z { color: #666; }
-
-        tr:nth-child(even) td { background: #333; }
-        th { background: #444; }
-      }
-      @media (max-width: 576px) {
-        body { margin-inline: 8px; }
-
-        header { grid-template-columns: 1fr; }
-
-        table { grid-template-columns: 1fr; }
-        td { padding-block: 1px; }
-        thead, td:nth-child(2) { display: none; }
-      }
-    </style>
   </head>
   <body>
     <header>
@@ -65,10 +26,14 @@
         <a target="_blank" rel="noopener noreferrer" href="https://www.patreon.com/TCGCSV"><img alt="Support me on Patreon!" src="/patreon-symbol-mark.svg"></a>
         <a target="_blank" rel="noopener noreferrer" href="https://cpt.tcgcsv.com"><img alt="TCGPlayer Affiliate Link" src="/TCGplayer-logo-primary.png"></a>
       </nav>
+      <nav class="internal-nav">
+        Home
+        <a href="faq.html">FAQs</a>
+      </nav>
     </header>
     <section>
-      <h3>Ahoy!</h3>
-      <p>This website is a personal project of mine that exposes categories, groups, products, and prices from TCGPlayer's API. The results are shared here for folks who can't get access to TCGPlayer's API. All responses used to generate the content on this website are cached as unmodified JSON text-files. The CSV's that I've put together DO have my personal affiliate links in there.</p>
+      <h2>Ahoy!</h2>
+      <p>This website is a hobby project that exposes categories, groups, products, and prices from TCGPlayer's API. The results are shared here for folks who can't get access to TCGPlayer's API. All responses used to generate the content on this website are cached as unmodified JSON text-files. The CSV's that I've put together DO have my personal affiliate links in there.</p>
       <ul>
         <li>You can see my terraform learnings, AWS infrastructure, and open source mess for this website on <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv">Github</a></li>
         <li>You can join this <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25">discord</a> to contact me, get updates, and talk about what would be cool to have next!</li>
@@ -76,14 +41,14 @@
       </ul>
     </section>
     <section>
-      <h3>Updates</h3>
+      <h2>Updates</h2>
       <p>
         <div id="schedule">All content <i>should</i> update daily around 20:00:00 UTC</div>
         <div id="updated-at"><a target="_blank" rel="noopener noreferrer" href="last-updated.txt">Last updated</a> at: </div>
       </p>
     </section>
-    <main id="info">
-      <h3>Files</h3>
+    <main id="files">
+      <h2>Files</h2>
       <p>TCGPlayer has 4 tiers of information.
         <ol>
           <li>
@@ -131,7 +96,7 @@
       </details>
     </main>
     <footer>
-      <p>Special thanks to our friends:</p>
+      <h3>Special thanks to our friends:</h3>
       <ul>
         <li>luceleaftea for maintaining a separate pile of CSVs on <a target="_blank" rel="noopener noreferrer" href="https://github.com/the-fab-cube/flesh-and-blood-cards">Github</a> for Flesh and Blood</li>
         <li>nago for hosting a wonderful pile of pokemon related assets over at <a target="_blank" rel="noopener noreferrer" href="https://malie.io/static/">Malie.io</a></li>
@@ -219,23 +184,26 @@
 
       const summary = document.createElement('summary');
       summary.innerHTML = `${category.name} (${groupsLength})`;
-      if (groupsLength === 0) summary.classList.add('z');
-
-      const table = addTable(detail, `${category.name} Group Name`, "Group ID", "Files")
-      if (groupsLength) {
-        groups.forEach((group) => {
-          addTableLine(
-            table,
-            group.name,
-            group.groupId,
-            'Products',
-            `${category.categoryId}/${group.groupId}/products`,
-            'Prices',
-            `${category.categoryId}/${group.groupId}/prices`,
-            'ProductsAndPrices.csv',
-            `${category.categoryId}/${group.groupId}/ProductsAndPrices.csv`,
-          )
-        });
+      if (groupsLength === 0)
+      {
+        summary.classList.add('z');
+      } else {
+        const table = addTable(detail, `${category.name} Group Name`, "Group ID", "Files")
+        if (groupsLength) {
+          groups.forEach((group) => {
+            addTableLine(
+              table,
+              group.name,
+              group.groupId,
+              'Products',
+              `${category.categoryId}/${group.groupId}/products`,
+              'Prices',
+              `${category.categoryId}/${group.groupId}/prices`,
+              'ProductsAndPrices.csv',
+              `${category.categoryId}/${group.groupId}/ProductsAndPrices.csv`,
+            )
+          });
+        }
       }
 
       detail.appendChild(summary);
@@ -265,10 +233,12 @@
         return a.categoryId - b.categoryId;
       });
 
-      main = document.getElementById('info');
+      main = document.getElementById('files');
       categoryTable = document.getElementById('category-table');
 
       categories.forEach((category) => {
+        if (category.categoryId == 21) return;
+
         addTableLine(
           categoryTable,
           category.name,

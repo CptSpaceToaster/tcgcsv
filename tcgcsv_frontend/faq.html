@@ -1,0 +1,125 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="TCGCSV"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="http://tcgcsv.com"/>
+    <meta property="og:description" content="Documentation for TCGCSV"/>
+    <meta name="theme-color" content="#663399">
+    <title>TCGCSV</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap">
+    <style>
+      h3 { margin-top: 80px; font-size: 1.4em; }
+      main { margin-bottom: 128px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>TCGPlayer CSV & JSON&nbsp;Dumps</h1>
+      <nav class="external-nav">
+        <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv"><img alt="Github Repo" src="/github-mark.svg"></a>
+        <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25"><img alt="Join Discord" src="/discord-mark.svg"></a>
+        <a target="_blank" rel="noopener noreferrer" href="https://www.patreon.com/TCGCSV"><img alt="Support me on Patreon!" src="/patreon-symbol-mark.svg"></a>
+        <a target="_blank" rel="noopener noreferrer" href="https://cpt.tcgcsv.com"><img alt="TCGPlayer Affiliate Link" src="/TCGplayer-logo-primary.png"></a>
+      </nav>
+      <nav class="internal-nav">
+        <a href="index.html">Home</a>
+        FAQs
+      </nav>
+    </header>
+    <main>
+      <h2>Frequently Asked Questions</h2>
+      <p>See something wrong or out of place? Reach out on <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25">discord</a> or submit an  <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv/issues">issue on Github</a> to ask a question or offer a correction!</p>
+
+      <h3>Can I scrape this website?</h3>
+      <p>If the premade CSVs aren't quite what you need then go ahead! It might make more sense to process the cached JSON files with any requests library directly.</p>
+      <pre><code><div><b>import</b> requests
+
+pokemon_category = <span class="s">&#39;3&#39;</span>
+
+r = requests.get(f<span class="s">&quot;https://tcgcsv.com/<span class="u">{pokemon_category}</span>/groups&quot;</span>)
+all_groups = r.json()[<span class="s">&#39;results&#39;</span>]
+
+<b>for</b> group <b>in</b> all_groups:
+    group_id = group[<span class="s">&#39;groupId&#39;</span>]
+    r = requests.get(f<span class="s">&quot;https://tcgcsv.com/<span class="u">{pokemon_category}</span>/<span class="u">{group_id}</span>/products&quot;</span>)
+    products = r.json()[<span class="s">&#39;results&#39;</span>]
+
+    <b>for</b> product <b>in</b> products:
+        <span class="c"># Process product information</span>
+        <b>print</b>(f<span class="s">&quot;<span class="u">{product[</span>&#39;productId&#39;<span class="u">]}</span> - <span class="u">{product[</span>&#39;name&#39;<span class="u">]}</span>&quot;</span>)
+
+    r = requests.get(f<span class="s">&quot;https://tcgcsv.com/<span class="u">{pokemon_category}</span>/<span class="u">{group_id}</span>/prices&quot;</span>)
+    prices = r.json()[<span class="s">&#39;results&#39;</span>]
+
+    <b>for</b> price <b>in</b> prices:
+        <span class="c"># Process prices</span>
+        <b>print</b>(f<span class="s">&quot;<span class="u">{price[</span>&#39;productId&#39;<span class="u">]}</span> - <span class="u">{price[</span>&#39;subTypeName&#39;<span class="u">]}</span> - <span class="u">{price[</span>&#39;midPrice&#39;<span class="u">]}</span>&quot;</span>)
+
+    <b>break</b> <span class="c"># Only process the first group and break for testing</span>
+    </div></code></pre>
+
+      <h3>Are there any past prices available?</h3>
+      <p>TCGPlayer does not offer historcal price information, but TCGCSV does maintain a price archive that records prices daily. You can download price history from February 8, 2024 and onwards! (You will need <a target="_blank" rel="noopener noreferrer" href="https://www.7-zip.org/download.html">7zip</a> to extract the archive)
+      <p>For the technical folks out there:</p>
+      <pre><code><div><span class="c"># Download archive</span>
+curl -O https://tcgcsv.com/archive/prices-2024-02-08.ppmd.7z
+
+<span class="c"># Extract</span>
+7z x prices-2024-02-08.ppmd.7z
+
+<span class="c"># Example price file</span>
+cat 2024-02-08/3/3170/prices</div></code></pre>
+      <p>For everyone else:
+        <ol>
+          <li>Install <a target="_blank" rel="noopener noreferrer" href="https://www.7-zip.org/download.html">7zip</a></li>
+          <li>Download the archives you'd like to extract:
+          <br><a href="https://tcgcsv.com/archive/prices-2024-02-08.ppmd.7z">https://tcgcsv.com/archive/prices-2024-02-08.ppmd.7z</a></li>
+          <li>Anything before 2024-04-21 doesn't exist at the time of writing :(</li>
+          <li>Use 7zip to extract the file you downloaded!</li>
+        </ol>
+      </p>
+      <p>Big thank-yous and shoutouts to <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/hoodwill">Hoodwill</a> for sharing some of the data they've been recording!</p>
+      <p class="z">If you, or someone you know or love has significant amounts of pricing history from before February 8, 2024 and they'd be comfortable giving it away freely please reach out!</p>
+
+      <h3>What's the best way to contact someone about this website?</h3>
+      <p>This website is just a hobby and a one-man show. The best place to reach the maintainer (CptSpaceToaster) is probably <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25">discord</a>.</p>
+
+      <h3>Can I look at individual listings or see sales for a specific product?</h3>
+      <p>Unfortunately no. This information isn't quite available to API users because TCGPlayer's API does not allow users to crawl individual listings. The <span class="mono">lowPrice</span> is the closest approximation TCGPlayer offers for the <i>lowest price listing</i>. With your own API access, you can pursue data at the SKU level and get a little more accurate information about the true "lowest listing" but the API does not divuldge much more than averages.</p>
+
+      <h3>What's with Categories 21, 69, and 70?</h3>
+      <p>Category 21 is <i>My Little Pony</i>, but Category 28 is <i>My Little Pony CCG</i>. Category 21 does not have any groups and has been mostly removed from TCGPlayer's side. You want Category 28 instead.</p>
+      <p>Categories 69 and 70 indicate that TCGPlayer attempted to categorize comic books at one point... and then stopped. Unlike category 21, these two categories have 1000's of groups available, however every group is empty (no products). These empty product-lists are <b>not</b> available to save on processing time.</p>
+      <p>For these reasons, I would strongly suggest skipping categories 21, 69, and 70 when processing all categories.</p>
+      <pre><code><div><b>import</b> requests
+
+r = requests.get(<span class="s">&#39;https://tcgcsv.com/categories&#39;</span>)
+all_categories = r.json()[<span class="s">&#39;results&#39;</span>]
+
+<b>for</b> category <b>in</b> all_categories:
+    category_id = category[<span class="s">&#39;categoryId&#39;</span>]
+    <b>if</b> category_id <b>in</b> [<span class="s">21</span>, <span class="s">69</span>, <span class="s">70</span>]:
+        <b>continue</b>
+
+    <span class="c"># Process the other categories normally</span></div></code></pre>
+
+      <h3>Why are some of the listed high prices absurd, unusually large, and "just bananas"?</h3>
+      <p>A lot of sellers on TCGPlayer engage in <b>Price Parking</b>: when a seller sets the price of a product to <i>thousands</i> of dollars so noone buys it. I don't know why sellers do this, but my guess is that a seller would want to park a card so they don't have to pick the card's set, printing, and condition if they want to list the card for sale again.</p>
+      <p>For that reason, the <span class="mono">highPrice</span> isn't very useful from TCGPlayer's data.</p>
+
+      <h3>Is there any data from Cardmarket?</h3>
+      <p>On TCGCSV... not yet. If anyone knows how to contact Cardmarket to pursue API access, that would be <i>helpful.</i></p>
+      <p class="z">I wrote an email to Cardmarket's contact email on June 26, 2024 12:29 PM (EDT) and a followup July 26, 2024, 3:06 PM (EDT), but I am still awaiting a response.</p>
+      <p>Cardmarket does offer Product and Price data exports <a target="_blank" rel="noopener noreferrer" href="https://www.cardmarket.com/en/Magic/Data/Download">on their website</a>, however the data lacks set and/or specific card information. The dumps seems hard to parse, and seem to require reverse engineering card names to learn how Cardmarket uniquely identifies which cards from which sets get what names... whether an Attack or Ability is being mentioned in the card's name, etc. Maybe someday?</p>
+    </main>
+  </body>
+</html>
