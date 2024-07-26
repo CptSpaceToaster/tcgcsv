@@ -4,8 +4,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta property="og:title" content="TCGCSV"/>
     <meta property="og:type" content="website"/>
-    <meta property="og:url" content="http://tcgcsv.com"/>
-    <meta property="og:description" content="Documentation for TCGCSV"/>
+    <meta property="og:url" content="http://tcgcsv.com/faq"/>
+    <meta property="og:description" content="Frequently asked questions"/>
     <meta name="theme-color" content="#663399">
     <title>TCGCSV</title>
     <link rel="manifest" href="/manifest.webmanifest">
@@ -17,13 +17,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap">
     <style>
-      h3 { margin-top: 80px; font-size: 1.4em; }
+      h3 { padding-block-start: 12px; margin-block-start: 58px; font-size: 1.4em; }
       main { margin-bottom: 128px; }
     </style>
   </head>
   <body>
     <header>
-      <h1>TCGPlayer CSV & JSON&nbsp;Dumps</h1>
+      <h1>TCGCSV</h1>
       <nav class="external-nav">
         <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv"><img alt="Github Repo" src="/github-mark.svg"></a>
         <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25"><img alt="Join Discord" src="/discord-mark.svg"></a>
@@ -39,7 +39,7 @@
       <h2>Frequently Asked Questions</h2>
       <p>See something wrong or out of place? Reach out on <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25">discord</a> or submit an  <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv/issues">issue on Github</a> to ask a question or offer a correction!</p>
 
-      <h3>Can I scrape this website?</h3>
+      <h3 id="scraping"># Can I scrape this website?</h3>
       <p>If the premade CSVs aren't quite what you need then go ahead! It might make more sense to process the cached JSON files with any requests library directly.</p>
       <pre><code><div><b>import</b> requests
 
@@ -67,7 +67,7 @@ all_groups = r.json()[<span class="s">&#39;results&#39;</span>]
     <b>break</b> <span class="c"># Only process the first group and break for testing</span>
     </div></code></pre>
 
-      <h3>Are there any past prices available?</h3>
+      <h3 id="price-archive">Are there any past prices available?</h3>
       <p>TCGPlayer does not offer historcal price information, but TCGCSV does maintain a price archive that records prices daily. You can download price history from February 8, 2024 and onwards! (You will need <a target="_blank" rel="noopener noreferrer" href="https://www.7-zip.org/download.html">7zip</a> to extract the archive)
       <p>For the technical folks out there:</p>
       <pre><code><div><span class="c"># Download archive</span>
@@ -90,13 +90,13 @@ cat 2024-02-08/3/3170/prices</div></code></pre>
       <p>Big thank-yous and shoutouts to <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/hoodwill">Hoodwill</a> for sharing some of the data they've been recording!</p>
       <p class="z">If you, or someone you know or love has significant amounts of pricing history from before February 8, 2024 and they'd be comfortable giving it away freely please reach out!</p>
 
-      <h3>What's the best way to contact someone about this website?</h3>
+      <h3 id="contact=methods">What's the best way to contact someone about this website?</h3>
       <p>This website is just a hobby and a one-man show. The best place to reach the maintainer (CptSpaceToaster) is probably <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25">discord</a>.</p>
 
-      <h3>Can I look at individual listings or see sales for a specific product?</h3>
+      <h3 id="individual-listings">Can I look at individual listings or see sales for a specific product?</h3>
       <p>Unfortunately no. This information isn't quite available to API users because TCGPlayer's API does not allow users to crawl individual listings. The <span class="mono">lowPrice</span> is the closest approximation TCGPlayer offers for the <i>lowest price listing</i>. With your own API access, you can pursue data at the SKU level and get a little more accurate information about the true "lowest listing" but the API does not divuldge much more than averages.</p>
 
-      <h3>What's with Categories 21, 69, and 70?</h3>
+      <h3 id="missing-categories">What's with Categories 21, 69, and 70?</h3>
       <p>Category 21 is <i>My Little Pony</i>, but Category 28 is <i>My Little Pony CCG</i>. Category 21 does not have any groups and has been mostly removed from TCGPlayer's side. You want Category 28 instead.</p>
       <p>Categories 69 and 70 indicate that TCGPlayer attempted to categorize comic books at one point... and then stopped. Unlike category 21, these two categories have 1000's of groups available, however every group is empty (no products). These empty product-lists are <b>not</b> available to save on processing time.</p>
       <p>For these reasons, I would strongly suggest skipping categories 21, 69, and 70 when processing all categories.</p>
@@ -112,14 +112,26 @@ all_categories = r.json()[<span class="s">&#39;results&#39;</span>]
 
     <span class="c"># Process the other categories normally</span></div></code></pre>
 
-      <h3>Why are some of the listed high prices absurd, unusually large, and "just bananas"?</h3>
+      <h3 id="price-parking">Why are some of the listed high prices absurd, unusually large, and "just bananas"?</h3>
       <p>A lot of sellers on TCGPlayer engage in <b>Price Parking</b>: when a seller sets the price of a product to <i>thousands</i> of dollars so noone buys it. I don't know why sellers do this, but my guess is that a seller would want to park a card so they don't have to pick the card's set, printing, and condition if they want to list the card for sale again.</p>
       <p>For that reason, the <span class="mono">highPrice</span> isn't very useful from TCGPlayer's data.</p>
 
-      <h3>Is there any data from Cardmarket?</h3>
+      <h3 id="cardmarket-data">Is there any data from Cardmarket?</h3>
       <p>On TCGCSV... not yet. If anyone knows how to contact Cardmarket to pursue API access, that would be <i>helpful.</i></p>
       <p class="z">I wrote an email to Cardmarket's contact email on June 26, 2024 12:29 PM (EDT) and a followup July 26, 2024, 3:06 PM (EDT), but I am still awaiting a response.</p>
       <p>Cardmarket does offer Product and Price data exports <a target="_blank" rel="noopener noreferrer" href="https://www.cardmarket.com/en/Magic/Data/Download">on their website</a>, however the data lacks set and/or specific card information. The dumps seems hard to parse, and seem to require reverse engineering card names to learn how Cardmarket uniquely identifies which cards from which sets get what names... whether an Attack or Ability is being mentioned in the card's name, etc. Maybe someday?</p>
     </main>
   </body>
+  <script>
+    const questions = document.getElementsByTagName('h3');
+    for(let i = 0; i < questions.length; i++)
+    {
+      if (questions[i].id) {
+        questions[i].style.cursor = 'pointer';
+        questions[i].onclick = () => {
+          window.location.hash = questions[i].id;
+        }
+      }
+    }
+  </script>
 </html>
