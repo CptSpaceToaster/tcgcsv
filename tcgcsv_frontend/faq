@@ -31,7 +31,7 @@
         <a target="_blank" rel="noopener noreferrer" href="https://cpt.tcgcsv.com"><img alt="TCGPlayer Affiliate Link" src="/TCGplayer-logo-primary.png"></a>
       </nav>
       <nav class="internal-nav">
-        <a href="index.html">Home</a>
+        <a href="/">Home</a>
         FAQs
       </nav>
     </header>
