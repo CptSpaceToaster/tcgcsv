@@ -21,10 +21,10 @@
     <header>
       <h1>TCGCSV</h1>
       <nav class="external-nav">
-        <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv"><img alt="Github Repo" src="/github-mark.svg"></a>
-        <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25"><img alt="Join Discord" src="/discord-mark.svg"></a>
-        <a target="_blank" rel="noopener noreferrer" href="https://www.patreon.com/TCGCSV"><img alt="Support me on Patreon!" src="/patreon-symbol-mark.svg"></a>
-        <a target="_blank" rel="noopener noreferrer" href="https://cpt.tcgcsv.com"><img alt="TCGPlayer Affiliate Link" src="/TCGplayer-logo-primary.png"></a>
+        <a target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/CptSpaceToaster/tcgcsv"><img alt="Github Repo" src="/github-mark.svg"></a>
+        <a target="_blank" rel="noopener noreferrer nofollow" href="https://discord.gg/bydv2BNV25"><img alt="Join Discord" src="/discord-mark.svg"></a>
+        <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.patreon.com/TCGCSV"><img alt="Support me on Patreon!" src="/patreon-symbol-mark.svg"></a>
+        <a target="_blank" rel="noopener noreferrer nofollow" href="https://cpt.tcgcsv.com"><img alt="TCGPlayer Affiliate Link" src="/TCGplayer-logo-primary.png"></a>
       </nav>
       <nav class="internal-nav">
         Home
@@ -35,8 +35,8 @@
       <h2>Ahoy!</h2>
       <p>This website is a hobby project that exposes categories, groups, products, and prices from TCGPlayer's API. The results are shared here for folks who can't get access to TCGPlayer's API. All responses used to generate the content on this website are cached as unmodified JSON text-files. The CSV's that I've put together DO have my personal affiliate links in there.</p>
       <ul>
-        <li>You can see my terraform learnings, AWS infrastructure, and open source mess for this website on <a target="_blank" rel="noopener noreferrer" href="https://github.com/CptSpaceToaster/tcgcsv">Github</a></li>
-        <li>You can join this <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/bydv2BNV25">discord</a> to contact me, get updates, and talk about what would be cool to have next!</li>
+        <li>You can see my terraform learnings, AWS infrastructure, and open source mess for this website on <a target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/CptSpaceToaster/tcgcsv">Github</a></li>
+        <li>You can join this <a target="_blank" rel="noopener noreferrer nofollow" href="https://discord.gg/bydv2BNV25">discord</a> to contact me, get updates, and talk about what would be cool to have next!</li>
         <li>If you would like to support this project, you can become a member on <a href="https://www.patreon.com/TCGCSV">Patreon</a> to help keep the lights on!</li>
       </ul>
     </section>
@@ -44,7 +44,7 @@
       <h2>Updates</h2>
       <p>
         <div id="schedule">All content <i>should</i> update daily around 20:00:00 UTC</div>
-        <div id="updated-at"><a target="_blank" rel="noopener noreferrer" href="last-updated.txt">Last updated</a> at: </div>
+        <div id="updated-at"><a target="_blank" rel="noopener noreferrer nofollow" href="last-updated.txt">Last updated</a> at: </div>
       </p>
     </section>
     <main id="files">
@@ -52,19 +52,19 @@
       <p>TCGPlayer has 4 tiers of information.
         <ol>
           <li>
-            <p>At the root are <a target="_blank" rel="noopener noreferrer" href="https://docs.tcgplayer.com/reference/catalog_getcategories-1">Categories</a>. Each category roughly translates to a card game or a collection of merchandise.
+            <p>At the root are <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/reference/catalog_getcategories-1">Categories</a>. Each category roughly translates to a card game or a collection of merchandise.
             <br>categoryId: 3 is Pokemon
             </p>
           </li>
           <li>
-            <p>Each category has <a target="_blank" rel="noopener noreferrer" href="https://docs.tcgplayer.com/reference/catalog_getcategorygroups-1">Groups</a>. Each group roughly translates to a set in a card game.
+            <p>Each category has <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/reference/catalog_getcategorygroups-1">Groups</a>. Each group roughly translates to a set in a card game.
               <br>groupId: 3170 is Pokemon's - <i>SWSH12: Silver Tempest</i> set.
             </p>
           </li>
           <li>
-            <p>Each group has <a target="_blank" rel="noopener noreferrer" href="https://docs.tcgplayer.com/reference/catalog_getproducts-1">Products</a>. Products can be sealed boxes, packs, or individual cards!
+            <p>Each group has <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/reference/catalog_getproducts-1">Products</a>. Products can be sealed boxes, packs, or individual cards!
               <br>Products have nested "extendedData" which is where TCGPlayer usually stores a card's text, rarity, and set number.
-              <br>Products have separate <a target="_blank" rel="noopener noreferrer" href="https://docs.tcgplayer.com/reference/pricing_getproductprices-1">Market Price</a> objects available in a parallel collection that need to be joined via a productId.
+              <br>Products have separate <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/reference/pricing_getproductprices-1">Market Price</a> objects available in a parallel collection that need to be joined via a productId.
               <br>productId: 451396 is <i>Lugia VSTAR</i>
             </p>
           </li>
@@ -77,7 +77,7 @@
       <details open>
         <summary>Root information</summary>
         <p style="margin-top: 0;">
-          <a target="_blank" rel="noopener noreferrer" href="categories">Categories</a>
+          <a target="_blank" rel="noopener noreferrer nofollow" href="categories">Categories</a>
           <a href="Categories.csv">Categories.csv</a>
         </p>
       </details>
@@ -98,9 +98,9 @@
     <footer>
       <h3>Special thanks to our friends:</h3>
       <ul>
-        <li>luceleaftea for maintaining a separate pile of CSVs on <a target="_blank" rel="noopener noreferrer" href="https://github.com/the-fab-cube/flesh-and-blood-cards">Github</a> for Flesh and Blood</li>
-        <li>nago for hosting a wonderful pile of pokemon related assets over at <a target="_blank" rel="noopener noreferrer" href="https://malie.io/static/">Malie.io</a></li>
-        <li>ZeldaZach for helping answer questions in TCGPlayer's discord with me, while also maintaining <a target="_blank" rel="noopener noreferrer" href="https://mtgjson.com">MTGJSON.com</a></li>
+        <li>luceleaftea for maintaining a separate pile of CSVs on <a target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/the-fab-cube/flesh-and-blood-cards">Github</a> for Flesh and Blood</li>
+        <li>nago for hosting a wonderful pile of pokemon related assets over at <a target="_blank" rel="noopener noreferrer nofollow" href="https://malie.io/static/">Malie.io</a></li>
+        <li>ZeldaZach for helping answer questions in TCGPlayer's discord with me, while also maintaining <a target="_blank" rel="noopener noreferrer nofollow" href="https://mtgjson.com">MTGJSON.com</a></li>
         <li>And viewers like you!</li>
       </ul>
     </footer>
@@ -135,7 +135,7 @@
       const a = document.createElement('a');
       a.innerHTML = linkText;
       a.target = '_blank';
-      a.rel = 'noopener noreferrer';
+      a.rel = 'noopener noreferrer nofollow';
       a.href = url;
       column.appendChild(a);
     }
