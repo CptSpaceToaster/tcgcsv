@@ -5,7 +5,8 @@
     <meta property="og:title" content="TCGCSV"/>
     <meta property="og:type" content="website"/>
     <meta property="og:url" content="http://tcgcsv.com/faq"/>
-    <meta property="og:description" content="Frequently asked questions"/>
+    <meta property="og:description" content="Frequently asked questions about TCGCSV."/>
+    <meta name="description" content="Frequently asked questions about TCGCSV."/>
     <meta name="theme-color" content="#663399">
     <title>TCGCSV</title>
     <link rel="manifest" href="/manifest.webmanifest">
