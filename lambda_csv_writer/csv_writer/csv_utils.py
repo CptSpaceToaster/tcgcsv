@@ -28,7 +28,10 @@ async def write_json(client: aiohttp_s3_client.S3Client, filename: str, results:
                     results,
                     chunk_size=PART_SIZE,
                 ),
-                headers={'Content-Type': content_type},
+                headers={
+                    'Content-Type': content_type,
+                    'X-Robots-Tag': 'noindex',
+                },
                 part_upload_tries=20,
             )
             running = False
@@ -66,7 +69,11 @@ async def write_csv(client: aiohttp_s3_client.S3Client, filename: str, fieldname
                     fieldnames,
                     chunk_size=PART_SIZE,
                 ),
-                headers={'Content-Type': content_type, 'Content-Disposition': f'attachment; filename="{suggested_filename}"'},
+                headers={
+                    'Content-Type': content_type,
+                    'Content-Disposition': f'attachment; filename="{suggested_filename}"',
+                    'X-Robots-Tag': 'noindex',
+                },
                 part_upload_tries=20,
             )
             running = False
@@ -95,7 +102,11 @@ async def write_buffered_bytes(client: aiohttp_s3_client.S3Client,buffered_bytes
                     buffered_bytes,
                     chunk_size=PART_SIZE,
                 ),
-                headers={'Content-Type': content_type, 'Content-Disposition': f'attachment; filename="{suggested_filename}"'},
+                headers={
+                    'Content-Type': content_type,
+                    'Content-Disposition': f'attachment; filename="{suggested_filename}"',
+                    'X-Robots-Tag': 'noindex',
+                },
                 part_upload_tries=20,
             )
             running = False
@@ -106,7 +117,10 @@ async def write_buffered_bytes(client: aiohttp_s3_client.S3Client,buffered_bytes
 
 
 async def write_txt(client: aiohttp_s3_client.S3Client, filename: str, text: str, content_type: str = 'text/plain'):
-    await client.put(filename, text, headers={'Content-Type': content_type})
+    await client.put(filename, text, headers={
+        'Content-Type': content_type,
+        'X-Robots-Tag': 'noindex',
+    })
 
 async def read_json(client: aiohttp_s3_client.S3Client, filename: str):
     async with client.get(filename) as response:
