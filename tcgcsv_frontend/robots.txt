@@ -1,12 +1,2 @@
 User-agent: *
 Allow: /
-
-User-agent: Googlebot
-Disallow: /categories
-Disallow: /Categories.csv
-Disallow: /*/groups
-Disallow: /*/Groups.csv
-Disallow: /*/*/products
-Disallow: /*/*/prices
-Disallow: /*/*/ProductsAndPrices.csv
-Disallow: /archive/*
