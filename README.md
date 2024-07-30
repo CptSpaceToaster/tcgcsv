@@ -40,12 +40,6 @@ Verify that terraform works with a:
 terraform plan
 ```
 
-To bundle the lambda into a zip: (it's just one file for now):
-
-```
-zip bundle.zip main.py
-```
-
 To deploy all terraform infrastructure (including the lambda bundles)
 ```
 terraform apply
@@ -61,7 +55,7 @@ AWS_SHARED_CREDENTIALS_FILE='~/.aws/personal_credentials' aws lambda invoke --re
 AWS_SHARED_CREDENTIALS_FILE='~/.aws/personal_credentials' aws lambda invoke --region=us-east-1 --function-name=tcgplayer_csv_writer output.txt
 ```
 
-To install a package and update the lambda layer:
+To install a package:
 
 ```
 cd lambda_support_layer
@@ -71,13 +65,19 @@ cd ..
 make lambda_support_layer/layer.zip
 ```
 
-https://cpt.tcgcsv.com/JC63 should redirect to "Bingo" https://www.tcgplayer.com/product/261484
+To update the lamda layer:
 
-We can store files in S3 and serve them through cloudfront now!
-  - https://tcgcsv.com/categories
-  - https://tcgcsv.com/categories.csv
-  - https://tcgcsv.com/1/groups
-  - https://tcgcsv.com/1/groups.csv
-  - https://tcgcsv.com/1/1/products
-  - https://tcgcsv.com/1/1/prices
-  - https://tcgcsv.com/1/1/ProductsAndPrices.csv
+```
+# Drop into a docker shell
+docker run -v lambda_support_layer:/working -it --rm --entrypoint /bin/bash public.ecr.aws/lambda/python:3.11-arm64
+
+cd /working
+
+# install gcc and python-devel
+yum -y install gcc python-devel
+rm layer.zip
+rm -rf python
+pip install --target python -r requirements.txt
+exit
+cd lambda_support_layer && zip layer.zip -r python
+```
