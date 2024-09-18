@@ -7,6 +7,10 @@ csv: bundles
 	AWS_SHARED_CREDENTIALS_FILE='~/.aws/personal_credentials' aws lambda invoke --region=us-east-1 --function-name=tcgplayer_csv_writer --cli-read-timeout 0 output.txt
 	cat output.txt
 
+.PHONY: local
+local:
+	poetry run python lambda_csv_writer/csv_writer/main.py
+
 # TODO: Instructions use docker and are in README...
 # lambda_support_layer/layer.zip: lambda_support_layer/requirements.txt
 # 	rm lambda_support_layer/layer.zip

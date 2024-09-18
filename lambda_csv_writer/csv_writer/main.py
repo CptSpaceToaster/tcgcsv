@@ -3,6 +3,7 @@ import time
 import copy
 import json
 import io
+import pprint
 
 from http import HTTPStatus
 from itertools import groupby
@@ -40,7 +41,7 @@ def overwriteURL(product):
         product['url'] = shorten(product['productId'])
 
 
-async def main(bucket_name, public_key, private_key, distribution_id, discord_webhook):
+async def main(bucket_name, public_key, private_key, distribution_id, discord_webhook, dry_run=True):
     start = time.time()
 
     written_file_pairs = []
@@ -57,7 +58,7 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
     conn = aiohttp.TCPConnector(limit_per_host=MAX_CONCURRENCY, limit=0, ttl_dns_cache=300)
     async with aiohttp.ClientSession(connector=conn) as session:
         # Initialize s3
-        s3_client = S3Client(
+        s3_client = None if dry_run else S3Client(
             url=f"https://{bucket_name}.s3.us-east-1.amazonaws.com",
             session=session,
             access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
@@ -70,7 +71,7 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
         archive7z = py7zr.SevenZipFile(archive7z_buffer, 'w', filters=ppmd_filters)
 
         # Collect manifest
-        manifest = await read_json(s3_client, tcgplayer_manifest_filename)
+        manifest = None if dry_run else await read_json(s3_client, tcgplayer_manifest_filename)
         if manifest is None:
             manifest = {}
 
@@ -99,11 +100,15 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
         if categories_hash != manifest.get(categories_json_filename):
             manifest[categories_json_filename] = categories_hash
 
-            await write_json(s3_client, categories_json_filename, categories_response)
-            written_file_pairs.append(categories_json_filename)
+            if dry_run:
+                print('Established Categories')
+                pprint.pp(categories_response)
+            else:
+                await write_json(s3_client, categories_json_filename, categories_response)
+                written_file_pairs.append(categories_json_filename)
 
-            await write_csv(s3_client, categories_csv_filename, categories[0].keys(), categories, 'Categories.csv')
-            written_file_pairs.append(categories_csv_filename)
+                await write_csv(s3_client, categories_csv_filename, categories[0].keys(), categories, 'Categories.csv')
+                written_file_pairs.append(categories_csv_filename)
 
         semaphore = asyncio.Semaphore(MAX_CONCURRENCY)
 
@@ -123,21 +128,26 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
                 groups = groups_response['results']
                 suggested_csv_name = f"{category['name'].replace('&', 'And').replace(' ', '')}Groups.csv"
 
+                if dry_run and category_id not in [77]:
+                    return
+
                 if category_id not in [69, 70]: # Marvel & DC Comics seem to ONLY have empty product lists... and filtering them here saves a bundle of time and energy
                     category_group_pairs.extend([(category_id, group) for group in groups])
-
-                if len(groups) == 0: # Apparently categories can exist without groups (rarely)
-                    return
 
                 establish_file_state(groups_json_filename)
                 if groups_hash != manifest.get(groups_json_filename):
                     manifest[groups_json_filename] = groups_hash
 
-                    await write_json(s3_client, groups_json_filename, groups_response)
-                    written_file_pairs.append(groups_json_filename)
+                    if dry_run:
+                        print(f'{category_id} Established Groups')
+                        pprint.pp(groups_response)
+                    else:
+                        await write_json(s3_client, groups_json_filename, groups_response)
+                        written_file_pairs.append(groups_json_filename)
 
-                    await write_csv(s3_client, groups_csv_filename, groups[0].keys(), groups, suggested_csv_name)
-                    written_file_pairs.append(groups_csv_filename)
+                        keys = [] if len(groups) == 0 else groups[0].keys()
+                        await write_csv(s3_client, groups_csv_filename, keys, groups, suggested_csv_name)
+                        written_file_pairs.append(groups_csv_filename)
 
         # TODO: Is there any way I can start the second process without blocking here like before with threads?
         await asyncio.gather(*(
@@ -173,14 +183,22 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
                     if products_hash != manifest.get(products_json_filename):
                         manifest[products_json_filename] = products_hash
 
-                        await write_json(s3_client, products_json_filename, products_response)
-                        written_file_pairs.append(products_json_filename)
+                        if dry_run:
+                            print(f'{category_id}/{group_id} Established Products')
+                            # pprint.pp(products_response)
+                        else:
+                            await write_json(s3_client, products_json_filename, products_response)
+                            written_file_pairs.append(products_json_filename)
 
                     if prices_hash != manifest.get(prices_json_filename):
                         manifest[prices_json_filename] = prices_hash
 
-                        await write_json(s3_client, prices_json_filename, prices_response)
-                        written_file_pairs.append(prices_json_filename)
+                        if dry_run:
+                            print(f'{category_id}/{group_id} Established Prices')
+                            # pprint.pp(prices_response)
+                        else:
+                            await write_json(s3_client, prices_json_filename, prices_response)
+                            written_file_pairs.append(prices_json_filename)
 
                     products = products_response['results']
                     prices = prices_response['results']
@@ -211,8 +229,12 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
                             if key not in fieldnames:
                                 fieldnames.append(key)
 
-                    await write_csv(s3_client, products_and_prices_csv_filename, fieldnames, products_to_write, suggested_csv_name)
-                    written_file_pairs.append(products_and_prices_csv_filename)
+                    if dry_run:
+                        print(f'{category_id}/{group_id} Established Products and Prices')
+                        # pprint.pp(products_to_write)
+                    else:
+                        await write_csv(s3_client, products_and_prices_csv_filename, fieldnames, products_to_write, suggested_csv_name)
+                        written_file_pairs.append(products_and_prices_csv_filename)
 
         await asyncio.gather(*(
             asyncio.ensure_future(
@@ -227,37 +249,40 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
         archive7z.close()
         price_archive_name = time.strftime('prices-%Y-%m-%d.ppmd.7z', time.localtime())
         archive7z_buffer.seek(0)
-        await write_buffered_bytes(
-            s3_client,
-            archive7z_buffer,
-            f'archive/{price_archive_name}',
-            price_archive_name,
-        )
+        if dry_run:
+            print('Established 7z archive')
+        else:
+            await write_buffered_bytes(
+                s3_client,
+                archive7z_buffer,
+                f'archive/{price_archive_name}',
+                price_archive_name,
+            )
         archive7z_buffer.close()
 
         # Post changes to discord
         removed_files = [filename for filename in manifest if filename not in seen_files and filename not in new_files]
 
-        if len(new_files) or len(removed_files):
-            embeds = []
-            if len(removed_files):
-                print(f"{len(removed_files)} removed files")
-                print(json.dumps(removed_files))
-                embeds.append({
-                    "title": "Removed Files",
-                    "color": 16711680,
-                    "description": '\n'.join(removed_files)[:4095]
-                })
-            if len(new_files):
-                print(f"{len(new_files)} new files")
-                print(json.dumps(new_files))
-                embeds.append({
-                    "title": "Added Files",
-                    "color": 65280,
-                    "description": '\n'.join(new_files)[:4095]
-                })
-
-            await session.post(discord_webhook, json={"embeds": embeds})
+        if not dry_run:
+            if len(new_files) or len(removed_files):
+                embeds = []
+                if len(removed_files):
+                    print(f"{len(removed_files)} removed files")
+                    print(json.dumps(removed_files))
+                    embeds.append({
+                        "title": "Removed Files",
+                        "color": 16711680,
+                        "description": '\n'.join(removed_files)[:4095]
+                    })
+                if len(new_files):
+                    print(f"{len(new_files)} new files")
+                    print(json.dumps(new_files))
+                    embeds.append({
+                        "title": "Added Files",
+                        "color": 65280,
+                        "description": '\n'.join(new_files)[:4095]
+                    })
+                await session.post(discord_webhook, json={"embeds": embeds})
 
             # Remove files from manifest and bucket
             had_trouble_deleting = {}
@@ -276,24 +301,30 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
             print(f"Had trouble deleting {len(had_trouble_deleting)} files:")
             print(json.dumps(had_trouble_deleting))
 
-        await write_json(s3_client, tcgplayer_manifest_filename, manifest)
-        written_file_pairs.append(tcgplayer_manifest_filename)
+        timestamp = time.strftime('%Y-%m-%dT%H:%M:%S%z', time.localtime())
+        if dry_run:
+            print('Established manifest')
+            print(f'Established last-updated.txt {timestamp}')
+        else:
+            await write_json(s3_client, tcgplayer_manifest_filename, manifest)
+            written_file_pairs.append(tcgplayer_manifest_filename)
 
-        await write_txt(s3_client, '/last-updated.txt', time.strftime('%Y-%m-%dT%H:%M:%S%z', time.localtime()))
-        written_file_pairs.append('/last-updated.txt')
+            await write_txt(s3_client, '/last-updated.txt', timestamp)
+            written_file_pairs.append('/last-updated.txt')
 
     delta = time.time() - start
 
-    cf.create_invalidation(
-        DistributionId=distribution_id,
-        InvalidationBatch={
-            'Paths': {
-                'Quantity': 1,
-                'Items': ['/*'],
-            },
-            'CallerReference': str(time.time()).replace(".", "")
-        }
-    )
+    if not dry_run:
+        cf.create_invalidation(
+            DistributionId=distribution_id,
+            InvalidationBatch={
+                'Paths': {
+                    'Quantity': 1,
+                    'Items': ['/*'],
+                },
+                'CallerReference': str(time.time()).replace(".", "")
+            }
+        )
 
     status = json.dumps({
         "total_requests": total_requests,
@@ -317,7 +348,7 @@ def lambda_handler(event, context):
     discord_webhook = os.getenv('TCGCSV_DISCORD_WEBHOOK')
 
     response = asyncio.run(
-        main(bucket_name, public_key, private_key, distribution_id, discord_webhook)
+        main(bucket_name, public_key, private_key, distribution_id, discord_webhook, dry_run=False)
     )
 
     return response
@@ -333,5 +364,5 @@ if __name__ == '__main__':
     discord_webhook = os.getenv('TF_VAR_TCGCSV_DISCORD_WEBHOOK')
 
     response = asyncio.run(
-        main(bucket_name, public_key, private_key, distribution_id, discord_webhook)
+        main(bucket_name, public_key, private_key, distribution_id, discord_webhook, dry_run=True)
     )
