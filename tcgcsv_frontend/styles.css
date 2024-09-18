@@ -25,6 +25,7 @@ a:visited, .s { color: #639; }
 .u { color: Black; }
 .c { color: DarkSeaGreen; font-style: italic; }
 .z { color: #AAA; }
+.highlight { background-color: #ffde64; }
 
 @media (prefers-color-scheme: dark) {
   body { color: White; background-color: #222; }
@@ -42,6 +43,7 @@ a:visited, .s { color: #639; }
   a:visited, .s { color: #a7d; }
   .u { color: White; }
   .z { color: #666; }
+  .highlight { background-color: #916D18; }
 }
 
 @media (max-width: 992px) {

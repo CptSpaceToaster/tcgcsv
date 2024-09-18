@@ -65,7 +65,7 @@
           <li>
             <p>Each group has <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/reference/catalog_getproducts-1">Products</a>. Products can be sealed boxes, packs, or individual cards!
               <br>Products have nested "extendedData" which is where TCGPlayer usually stores a card's text, rarity, and set number.
-              <br>Products have separate <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/reference/pricing_getproductprices-1">Market Price</a> objects available in a parallel collection that need to be joined via a productId.
+              <br>Products have separate <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/reference/pricing_getgroupprices">Market Price</a> objects available in a parallel collection that need to be joined via a productId.
               <br>productId: 451396 is <i>Lugia VSTAR</i>
             </p>
           </li>
@@ -172,15 +172,17 @@
       const detail = document.createElement('details');
       parent.appendChild(detail);
 
-      let groups;
+      let groups = [];
       let groupsLength = 0
       if (![69, 70].includes(category.categoryId)) {
         const groupsResponse = await fetch(`${category.categoryId}/groups`);
-        groups = (await groupsResponse.json()).results;
-        groups.sort((a, b) => {
-          return a.groupId - b.groupId;
-        });
-        groupsLength = groups.length
+        if (groupsResponse.status == 200) {
+          groups = (await groupsResponse.json()).results;
+          groups.sort((a, b) => {
+            return a.groupId - b.groupId;
+          });
+          groupsLength = groups.length
+        }
       }
 
       const summary = document.createElement('summary');
@@ -228,11 +230,14 @@
       // Get current locale
       updated.appendChild(document.createTextNode(lastUpdatedDate.toLocaleString('en-US', timestampOptions)));
 
+      let categories = []
       const categoriesResponse = await fetch("categories");
-      const categories = (await categoriesResponse.json()).results;
-      categories.sort((a, b) => {
-        return a.categoryId - b.categoryId;
-      });
+      if (categoriesResponse.status == 200) {
+        categories = (await categoriesResponse.json()).results;
+        categories.sort((a, b) => {
+          return a.categoryId - b.categoryId;
+        });
+      }
 
       main = document.getElementById('files');
       categoryTable = document.getElementById('category-table');

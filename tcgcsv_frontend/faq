@@ -18,7 +18,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap">
     <style>
-      h3 { padding-block-start: 12px; margin-block-start: 58px; font-size: 1.4em; }
+      h3 { padding-block: 4px; margin-block-start: 62px; font-size: 1.4em; }
+      h3:hover {
+        opacity: 1;
+        opacity: var(--h3-hover-opacity);
+      }
       main { margin-bottom: 128px; }
     </style>
   </head>
@@ -84,14 +88,14 @@ cat 2024-02-08/3/3170/prices</div></code></pre>
           <li>Install <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.7-zip.org/download.html">7zip</a></li>
           <li>Download the archives you'd like to extract:
           <br><a href="https://tcgcsv.com/archive/prices-2024-02-08.ppmd.7z">https://tcgcsv.com/archive/prices-2024-02-08.ppmd.7z</a></li>
-          <li>Anything before 2024-04-21 doesn't exist at the time of writing :(</li>
+          <li>Anything before 2024-02-08 doesn't exist at the time of writing :(</li>
           <li>Use 7zip to extract the file you downloaded!</li>
         </ol>
       </p>
       <p>Big thank-yous and shoutouts to <a target="_blank" rel="noopener noreferrer nofollow" href="https://twitter.com/hoodwill">Hoodwill</a> for sharing some of the data they've been recording!</p>
       <p class="z">If you, or someone you know or love has significant amounts of pricing history from before February 8, 2024 and they'd be comfortable giving it away freely please reach out!</p>
 
-      <h3 id="contact=methods">What's the best way to contact someone about this website?</h3>
+      <h3 id="contact-methods">What is the best way to contact someone about this website?</h3>
       <p>This website is just a hobby and a one-man show. The best place to reach the maintainer (CptSpaceToaster) is probably <a target="_blank" rel="noopener noreferrer nofollow" href="https://discord.gg/bydv2BNV25">discord</a>.</p>
 
       <h3 id="individual-listings">Can I look at individual listings or see sales for a specific product?</h3>
@@ -117,6 +121,19 @@ all_categories = r.json()[<span class="s">&#39;results&#39;</span>]
       <p>A lot of sellers on TCGPlayer engage in <b>Price Parking</b>: when a seller sets the price of a product to <i>thousands</i> of dollars so noone buys it. I don't know why sellers do this, but my guess is that a seller would want to park a card so they don't have to pick the card's set, printing, and condition if they want to list the card for sale again.</p>
       <p>For that reason, the <span class="mono">highPrice</span> isn't very useful from TCGPlayer's data.</p>
 
+      <h3 id="tcgplayer-api-access">How can I get my own TCGPlayer API access?</h3>
+      <p>TCGPlayer moved to a slightly more involved process, and hasn't been readily handing out new API Keys. Rather than "ask first, then build", try to build out as much of your application as possible without a key. Once you have an app started you can contact them about their <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/docs/tcgplayer-affiliate-program">affiliate program</a> and show off what you're building. Then you will be in a great spot to request additional API access if needed!</p>
+
+      <h3 id="tcgplayer-api-compatibility">Is it easy to migrate from TCGCSV to TCGPlayer's API?</h3>
+      <p>The cached files and JSON responses are sourced <i>directly</i> from TCGPlayer's API (They just might be ~24 hours old). The JSON data and properties should match exactly what you would get from their API directly. Migrating over to their API should be straight forward.
+        Some considerations:
+        <ul>
+          <li>TCGPlayer's paged data is collated here. You will need to walk pages of 100 items at a time as you interact with their endpoints and collections.</li>
+          <li>TCGPlayer's product endpoint returns a 404 and a JSON error for empty content. You may need to normalize certain edge cases such as when a group doesn't have any products.</li>
+          <li>TCGPlayer does not offer archived prices</li>
+        </ul>
+      </p>
+
       <h3 id="cardmarket-data">Is there any data from Cardmarket?</h3>
       <p>On TCGCSV... not yet. If anyone knows how to contact Cardmarket to pursue API access, that would be <i>helpful.</i></p>
       <p class="z">I wrote an email to Cardmarket's contact email on June 26, 2024 12:29 PM (EDT) and a followup July 26, 2024, 3:06 PM (EDT), but I am still awaiting a response.</p>
@@ -124,15 +141,33 @@ all_categories = r.json()[<span class="s">&#39;results&#39;</span>]
     </main>
   </body>
   <script>
+    function onHashChange(event) {
+      const hash = window.location.hash.substring(1);
+      const questions = document.getElementsByTagName('h3');
+      for(let i = 0; i < questions.length; i++) {
+        if (questions[i].id) {
+          if (questions[i].id == hash) {
+            questions[i].classList.add("highlight");
+          } else {
+            questions[i].classList.remove("highlight");
+          }
+        }
+      }
+    }
+
+    addEventListener("hashchange", onHashChange);
+
     const questions = document.getElementsByTagName('h3');
-    for(let i = 0; i < questions.length; i++)
-    {
+    for(let i = 0; i < questions.length; i++) {
       if (questions[i].id) {
         questions[i].style.cursor = 'pointer';
         questions[i].onclick = () => {
           window.location.hash = questions[i].id;
         }
+        questions[i].style.setProperty('--h3-hover-opacity', '0.85');
       }
     }
+
+    onHashChange(null);
   </script>
 </html>
