@@ -18,9 +18,9 @@ resource "aws_lambda_layer_version" "lambda_support_layer" {
   compatible_runtimes = ["python3.11"]
 }
 
-resource "aws_lambda_function" "tcgplayer_json_lambda_csv_writer" {
+resource "aws_lambda_function" "tcgcsv_lambda_etl" {
   filename      = "lambda_csv_writer/bundle.zip"
-  function_name = "tcgplayer_csv_writer"
+  function_name = "tcgcsv_etl"
   role          = aws_iam_role.lambda-s3-executor-role.arn
   handler       = "csv_writer.main.lambda_handler"
   timeout       = 900
@@ -44,25 +44,25 @@ resource "aws_lambda_function" "tcgplayer_json_lambda_csv_writer" {
   }
 }
 
-resource "aws_cloudwatch_event_rule" "csv_writer_lambda_event_rule" {
-  name = "csv_writer_lambda_event_rule"
+resource "aws_cloudwatch_event_rule" "tcgcsv_etl_lambda_event_rule" {
+  name = "tcgcsv_etl_lambda_event_rule"
   schedule_expression = "cron(0 20 * * ? *)" // Every day at 20:00 UTC which is 4:00 PM EST
 }
 
-resource "aws_cloudwatch_event_target" "csv_writer_lambda_target" {
-  arn = aws_lambda_function.tcgplayer_json_lambda_csv_writer.arn
-  rule = aws_cloudwatch_event_rule.csv_writer_lambda_event_rule.name
+resource "aws_cloudwatch_event_target" "tcgcsv_etl_lambda_target" {
+  arn = aws_lambda_function.tcgcsv_lambda_etl.arn
+  rule = aws_cloudwatch_event_rule.tcgcsv_etl_lambda_event_rule.name
 }
 
 resource "aws_lambda_permission" "allow_cloudwatch" {
   statement_id = "AllowExecutionFromCloudWatch"
   action = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.tcgplayer_json_lambda_csv_writer.function_name
+  function_name = aws_lambda_function.tcgcsv_lambda_etl.function_name
   principal = "events.amazonaws.com"
-  source_arn = aws_cloudwatch_event_rule.csv_writer_lambda_event_rule.arn
+  source_arn = aws_cloudwatch_event_rule.tcgcsv_etl_lambda_event_rule.arn
 }
 
 resource "aws_cloudwatch_log_group" "function_log_group" {
-  name = "/aws/lambda/${aws_lambda_function.tcgplayer_json_lambda_csv_writer.function_name}"
+  name = "/aws/lambda/${aws_lambda_function.tcgcsv_lambda_etl.function_name}"
   retention_in_days = 1
 }

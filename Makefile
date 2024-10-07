@@ -4,7 +4,7 @@ bundles: lambda_expander/bundle.zip lambda_csv_writer/bundle.zip lambda_support_
 
 .PHONY: csv
 csv: bundles
-	AWS_SHARED_CREDENTIALS_FILE='~/.aws/personal_credentials' aws lambda invoke --region=us-east-1 --function-name=tcgplayer_csv_writer --cli-read-timeout 0 output.txt
+	AWS_SHARED_CREDENTIALS_FILE='~/.aws/personal_credentials' aws lambda invoke --region=us-east-1 --function-name=tcgcsv_etl --cli-read-timeout 0 output.txt
 	cat output.txt
 
 .PHONY: local

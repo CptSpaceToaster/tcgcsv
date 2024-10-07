@@ -1,8 +1,8 @@
-resource "aws_lambda_function" "tcgplayer_json_lambda_expander" {
+resource "aws_lambda_function" "tcgcsv_lambda_url_expander" {
   # If the file is not in the current working directory you will need to include a
   # path.module in the filename.
   filename      = "lambda_expander/bundle.zip"
-  function_name = "tcgplayer_json_expander"
+  function_name = "tcgcsv_url_expander"
   role          = aws_iam_role.lambda-executor-role.arn
   handler       = "main.lambda_handler"
 
@@ -24,9 +24,9 @@ resource "aws_lambda_function" "tcgplayer_json_lambda_expander" {
 resource "aws_lambda_permission" "apigw" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
-  function_name = "${aws_lambda_function.tcgplayer_json_lambda_expander.function_name}"
+  function_name = "${aws_lambda_function.tcgcsv_lambda_url_expander.function_name}"
   principal     = "apigateway.amazonaws.com"
 
   # The /*/* portion grants access from any method on any resource within the API Gateway "REST API".
-  source_arn = "${aws_apigatewayv2_api.tcgplayer_json_api.execution_arn}/*/*"
+  source_arn = "${aws_apigatewayv2_api.tcgcsv_api.execution_arn}/*/*"
 }
