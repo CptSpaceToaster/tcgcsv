@@ -41,4 +41,4 @@ def lambda_handler(event, context):
             'Location': generate_impact_affiliate_link(f'https://www.tcgplayer.com/product/{tcgplayer_id}'),
             'X-Robots-Tag': 'noindex',
         }
-     }
+    }

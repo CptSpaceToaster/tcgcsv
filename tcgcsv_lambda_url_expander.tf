@@ -1,7 +1,7 @@
 resource "aws_lambda_function" "tcgcsv_lambda_url_expander" {
   # If the file is not in the current working directory you will need to include a
   # path.module in the filename.
-  filename      = "lambda_expander/bundle.zip"
+  filename      = "lambda_url_expander/bundle.zip"
   function_name = "tcgcsv_url_expander"
   role          = aws_iam_role.lambda-executor-role.arn
   handler       = "main.lambda_handler"
@@ -9,7 +9,7 @@ resource "aws_lambda_function" "tcgcsv_lambda_url_expander" {
   # The filebase64sha256() function is available in Terraform 0.11.12 and later
   # For Terraform 0.11.11 and earlier, use the base64sha256() function and the file() function:
   # source_code_hash = "${base64sha256(file("lambda_function_payload.zip"))}"
-  source_code_hash = filebase64sha256("lambda_expander/bundle.zip")
+  source_code_hash = filebase64sha256("lambda_url_expander/bundle.zip")
 
   runtime = "python3.11"
 
