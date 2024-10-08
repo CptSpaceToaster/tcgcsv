@@ -22,7 +22,7 @@ resource "aws_lambda_function" "tcgcsv_lambda_etl" {
   filename      = "lambda_tcgplayer_etl/bundle.zip"
   function_name = "tcgcsv_etl"
   role          = aws_iam_role.lambda-s3-executor-role.arn
-  handler       = "csv_writer.main.lambda_handler"
+  handler       = "tcgplayer_etl.main.lambda_handler"
   timeout       = 900
   memory_size   = 1024
   architectures = ["arm64"]
