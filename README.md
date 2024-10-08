@@ -48,24 +48,18 @@ terraform apply
 To test the lambda directly:
 
 ```
-# expander
-AWS_SHARED_CREDENTIALS_FILE='~/.aws/personal_credentials' aws lambda invoke --region=us-east-1 --function-name=   output.txt
-
-# csv_writer
-AWS_SHARED_CREDENTIALS_FILE='~/.aws/personal_credentials' aws lambda invoke --region=us-east-1 --function-name=tcgplayer_csv_writer output.txt
+AWS_SHARED_CREDENTIALS_FILE='~/.aws/personal_credentials' aws lambda invoke --region=us-east-1 --function-name=tcgcsv_etl --cli-read-timeout 0 output.txt
 ```
 
-To install a package:
+Python dependencies used by the lambda ETL scripts are managed by a `requirements.txt` file. Installing dependencies locally and freezing the results is an easy way to update `requirements.txt`.
 
 ```
 cd lambda_support_layer
 pip install merkle-json -t ./python
 pip freeze --path ./python > requirements.txt
-cd ..
-make lambda_support_layer/layer.zip
 ```
 
-To update the lamda layer:
+To update the lambda support layer's archive:
 
 ```
 # Drop into a docker shell

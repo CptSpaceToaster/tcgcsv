@@ -1,5 +1,5 @@
 .PHONY: bundles
-bundles: lambda_url_expander/bundle.zip lambda_etl/bundle.zip lambda_support_layer/layer.zip
+bundles: lambda_url_expander/bundle.zip lambda_tcgplayer_etl/bundle.zip lambda_support_layer/layer.zip
 	terraform apply
 
 .PHONY: csv
@@ -9,7 +9,7 @@ csv: bundles
 
 .PHONY: local
 local:
-	poetry run python lambda_etl/csv_writer/main.py
+	poetry run python lambda_tcgplayer_etl/tcgplayer_etl/main.py
 
 # TODO: Instructions use docker and are in README...
 # lambda_support_layer/layer.zip: lambda_support_layer/requirements.txt
@@ -25,4 +25,4 @@ local:
 .PHONY: clean
 clean:
 	rm lambda_url_expander/bundle.zip
-	rm lambda_etl/bundle.zip
+	rm lambda_tcgplayer_etl/bundle.zip

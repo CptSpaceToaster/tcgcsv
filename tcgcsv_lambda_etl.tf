@@ -19,7 +19,7 @@ resource "aws_lambda_layer_version" "lambda_support_layer" {
 }
 
 resource "aws_lambda_function" "tcgcsv_lambda_etl" {
-  filename      = "lambda_etl/bundle.zip"
+  filename      = "lambda_tcgplayer_etl/bundle.zip"
   function_name = "tcgcsv_etl"
   role          = aws_iam_role.lambda-s3-executor-role.arn
   handler       = "csv_writer.main.lambda_handler"
@@ -28,7 +28,7 @@ resource "aws_lambda_function" "tcgcsv_lambda_etl" {
   architectures = ["arm64"]
   layers        = [aws_lambda_layer_version.lambda_support_layer.arn]
 
-  source_code_hash = filebase64sha256("lambda_etl/bundle.zip")
+  source_code_hash = filebase64sha256("lambda_tcgplayer_etl/bundle.zip")
 
   runtime = "python3.11"
 
