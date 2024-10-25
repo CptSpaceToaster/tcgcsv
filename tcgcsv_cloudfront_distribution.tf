@@ -17,6 +17,25 @@ resource "aws_cloudfront_cache_policy" "vault_cache" {
   }
 }
 
+resource "aws_cloudfront_cache_policy" "long_lived_cache" {
+  name = "long-lived-cache"
+  default_ttl = 2592000 # 30 days
+  max_ttl = 5184000 # 60 days
+  min_ttl = 2592000 # 30 days
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    cookies_config {
+      cookie_behavior = "none"
+    }
+    headers_config {
+      header_behavior = "none"
+    }
+    query_strings_config {
+      query_string_behavior = "none"
+    }
+  }
+}
+
 resource "aws_cloudfront_response_headers_policy" "allow_cors" {
   name    = "allow-cors"
 
@@ -53,6 +72,24 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     origin_access_control_id = aws_cloudfront_origin_access_control.S3_OA.id
   }
 
+  origin {
+    domain_name = aws_s3_bucket.tcgcsv_tcgplayer_vault.bucket_regional_domain_name
+    origin_id = local.tcgplayer_vault_s3_origin_id
+    origin_access_control_id = aws_cloudfront_origin_access_control.S3_OA.id
+  }
+
+  origin {
+    domain_name = aws_s3_bucket.tcgcsv_frontend.bucket_regional_domain_name
+    origin_id = local.frontend_s3_origin_id
+    origin_access_control_id = aws_cloudfront_origin_access_control.S3_OA.id
+  }
+
+  origin {
+    domain_name = aws_s3_bucket.tcgcsv_archive.bucket_regional_domain_name
+    origin_id = local.archive_s3_origin_id
+    origin_access_control_id = aws_cloudfront_origin_access_control.S3_OA.id
+  }
+
   enabled = true
   is_ipv6_enabled = true
   http_version = "http2and3"
@@ -64,10 +101,30 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     cache_policy_id = aws_cloudfront_cache_policy.vault_cache.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.allow_cors.id
     allowed_methods = ["GET", "HEAD", "OPTIONS"]
-    cached_methods   = ["GET", "HEAD"]
+    cached_methods = ["GET", "HEAD", "OPTIONS"]
     target_origin_id = local.s3_origin_id
     viewer_protocol_policy = "redirect-to-https"
   }
+
+  ordered_cache_behavior {
+    path_pattern = "/tcgplayer/*"
+    cache_policy_id = aws_cloudfront_cache_policy.vault_cache.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.allow_cors.id
+    allowed_methods = ["GET", "HEAD", "OPTIONS"]
+    cached_methods = ["GET", "HEAD", "OPTIONS"]
+    target_origin_id = local.tcgplayer_vault_s3_origin_id
+    viewer_protocol_policy = "redirect-to-https"
+  }
+
+  # ordered_cache_behavior {
+  #   path_pattern = "/archive/*"
+  #   cache_policy_id = aws_cloudfront_cache_policy.long_lived_cache.id
+  #   response_headers_policy_id = aws_cloudfront_response_headers_policy.allow_cors.id
+  #   allowed_methods = ["GET", "HEAD", "OPTIONS"]
+  #   cached_methods = ["GET", "HEAD", "OPTIONS"]
+  #   target_origin_id = local.archive_s3_origin_id
+  #   viewer_protocol_policy = "redirect-to-https"
+  # }
 
   price_class = "PriceClass_100"
 

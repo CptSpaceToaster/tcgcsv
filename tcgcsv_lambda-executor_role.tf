@@ -91,32 +91,3 @@ resource "aws_iam_role_policy_attachment" "function_logging_policy_attachment" {
   role = aws_iam_role.lambda-s3-executor-role.name
   policy_arn = aws_iam_policy.lambda_can_log.arn
 }
-
-
-
-# Bucket level policies
-data "aws_iam_policy_document" "bucket_policy" {
-  statement {
-    sid       = "AllowCloudFrontServicePrincipalReadOnly"
-    effect    = "Allow"
-    actions   = ["s3:GetObject"]
-    resources = ["${aws_s3_bucket.tcgplayer_json_csv_vault.arn}/*"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["cloudfront.amazonaws.com"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "AWS:SourceArn"
-      values   = ["${aws_cloudfront_distribution.s3_distribution.arn}"]
-    }
-  }
-}
-
-# Applying the bucket level policies
-resource "aws_s3_bucket_policy" "allow_access_from_cloudfront" {
-  bucket = aws_s3_bucket.tcgplayer_json_csv_vault.id
-  policy = data.aws_iam_policy_document.bucket_policy.json
-}
