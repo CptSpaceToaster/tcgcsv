@@ -41,13 +41,13 @@ def overwriteURL(product):
         product['url'] = shorten(product['productId'])
 
 
-async def main(bucket_name, public_key, private_key, distribution_id, discord_webhook, dry_run=True):
+async def main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, archive_bucket_name, public_key, private_key, distribution_id, discord_webhook, dry_run=True):
     start = time.time()
 
     written_file_pairs = []
     total_requests = 0
 
-    tcgplayer_manifest_filename = '/tcgplayer-manifest.txt'
+    tcgplayer_manifest_filename = '/tcgplayer/manifest.txt'
 
     MAX_CONCURRENCY = 60
 
@@ -66,12 +66,36 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
             session_token=os.getenv('AWS_SESSION_TOKEN'),
         )
 
+        tcgplayer_vault_s3_client = None if dry_run else S3Client(
+            url=f"https://{tcgplayer_vault_bucket_name}.s3.us-east-1.amazonaws.com",
+            session=session,
+            access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+            secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+            session_token=os.getenv('AWS_SESSION_TOKEN'),
+        )
+
+        frontend_s3_client = None if dry_run else S3Client(
+            url=f"https://{frontend_bucket_name}.s3.us-east-1.amazonaws.com",
+            session=session,
+            access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+            secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+            session_token=os.getenv('AWS_SESSION_TOKEN'),
+        )
+
+        archive_s3_client = None if dry_run else S3Client(
+            url=f"https://{archive_bucket_name}.s3.us-east-1.amazonaws.com",
+            session=session,
+            access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+            secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+            session_token=os.getenv('AWS_SESSION_TOKEN'),
+        )
+
         archive7z_buffer = io.BytesIO()
         ppmd_filters = [{"id": py7zr.FILTER_PPMD, 'order': 8, 'mem': 24}]
         archive7z = py7zr.SevenZipFile(archive7z_buffer, 'w', filters=ppmd_filters)
 
         # Collect manifest
-        manifest = None if dry_run else await read_json(s3_client, tcgplayer_manifest_filename)
+        manifest = None if dry_run else await read_json(tcgplayer_vault_s3_client, tcgplayer_manifest_filename)
         if manifest is None:
             manifest = {}
 
@@ -105,9 +129,11 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
                 pprint.pp(categories_response)
             else:
                 await write_json(s3_client, categories_json_filename, categories_response)
+                await write_json(tcgplayer_vault_s3_client, '/tcgplayer' + categories_json_filename, categories_response)
                 written_file_pairs.append(categories_json_filename)
 
                 await write_csv(s3_client, categories_csv_filename, categories[0].keys(), categories, 'Categories.csv')
+                await write_csv(tcgplayer_vault_s3_client, '/tcgplayer' + categories_csv_filename, categories[0].keys(), categories, 'Categories.csv')
                 written_file_pairs.append(categories_csv_filename)
 
         semaphore = asyncio.Semaphore(MAX_CONCURRENCY)
@@ -143,10 +169,12 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
                         pprint.pp(groups_response)
                     else:
                         await write_json(s3_client, groups_json_filename, groups_response)
+                        await write_json(tcgplayer_vault_s3_client, '/tcgplayer' + groups_json_filename, groups_response)
                         written_file_pairs.append(groups_json_filename)
 
                         keys = [] if len(groups) == 0 else groups[0].keys()
                         await write_csv(s3_client, groups_csv_filename, keys, groups, suggested_csv_name)
+                        await write_csv(tcgplayer_vault_s3_client, '/tcgplayer' + groups_csv_filename, keys, groups, suggested_csv_name)
                         written_file_pairs.append(groups_csv_filename)
 
         # TODO: Is there any way I can start the second process without blocking here like before with threads?
@@ -188,6 +216,7 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
                             # pprint.pp(products_response)
                         else:
                             await write_json(s3_client, products_json_filename, products_response)
+                            await write_json(tcgplayer_vault_s3_client, '/tcgplayer' + products_json_filename, products_response)
                             written_file_pairs.append(products_json_filename)
 
                     if prices_hash != manifest.get(prices_json_filename):
@@ -198,6 +227,7 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
                             # pprint.pp(prices_response)
                         else:
                             await write_json(s3_client, prices_json_filename, prices_response)
+                            await write_json(tcgplayer_vault_s3_client, '/tcgplayer' + prices_json_filename, prices_response)
                             written_file_pairs.append(prices_json_filename)
 
                     products = products_response['results']
@@ -234,6 +264,7 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
                         # pprint.pp(products_to_write)
                     else:
                         await write_csv(s3_client, products_and_prices_csv_filename, fieldnames, products_to_write, suggested_csv_name)
+                        await write_csv(tcgplayer_vault_s3_client, '/tcgplayer' + products_and_prices_csv_filename, fieldnames, products_to_write, suggested_csv_name)
                         written_file_pairs.append(products_and_prices_csv_filename)
 
         await asyncio.gather(*(
@@ -252,6 +283,14 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
         if dry_run:
             print('Established 7z archive')
         else:
+            await write_buffered_bytes(
+                archive_s3_client,
+                archive7z_buffer,
+                f'/archive/{price_archive_name}',
+                price_archive_name,
+            )
+            # TODO: When removing the block below, this seek(0) also needs to go.
+            archive7z_buffer.seek(0)
             await write_buffered_bytes(
                 s3_client,
                 archive7z_buffer,
@@ -289,11 +328,24 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
             removed_files.sort()
             for group, items in groupby(removed_files, lambda x: "/".join(x.split("/", 3)[:3])):
                 for item in items:
+                    async with tcgplayer_vault_s3_client.delete('/tcgplayer' + item) as resp:
+                        if resp.status != HTTPStatus.NO_CONTENT:
+                            # had_trouble_deleting.append[item] = resp.status
+                            pass
+                        else:
+                            # del manifest[item]
+                            pass
+
                     async with s3_client.delete(item) as resp:
                         if resp.status != HTTPStatus.NO_CONTENT:
                             had_trouble_deleting.append[item] = resp.status
                         else:
                             del manifest[item]
+
+                async with tcgplayer_vault_s3_client.delete(f'/tcgplayer{group}/ProductsAndPrices.csv') as resp:
+                    if resp.status != HTTPStatus.NO_CONTENT:
+                        # had_trouble_deleting.append[f'/tcgplayer{group}/ProductsAndPrices.csv'] = resp.status
+                        pass
                 async with s3_client.delete(f'{group}/ProductsAndPrices.csv') as resp:
                     if resp.status != HTTPStatus.NO_CONTENT:
                         had_trouble_deleting.append[f'{group}/ProductsAndPrices.csv'] = resp.status
@@ -306,15 +358,26 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
             print('Established manifest')
             print(f'Established last-updated.txt {timestamp}')
         else:
-            await write_json(s3_client, tcgplayer_manifest_filename, manifest)
+            await write_json(tcgplayer_vault_s3_client, tcgplayer_manifest_filename, manifest)
             written_file_pairs.append(tcgplayer_manifest_filename)
 
+            await write_txt(frontend_s3_client, '/last-updated.txt', timestamp)
             await write_txt(s3_client, '/last-updated.txt', timestamp)
             written_file_pairs.append('/last-updated.txt')
 
     delta = time.time() - start
 
     if not dry_run:
+        # cf.create_invalidation(
+        #     DistributionId=distribution_id,
+        #     InvalidationBatch={
+        #         'Paths': {
+        #             'Quantity': 1,
+        #             'Items': ['/tcgplayer/*', '/last-updated.txt'],
+        #         },
+        #         'CallerReference': str(time.time()).replace(".", "")
+        #     }
+        # )
         cf.create_invalidation(
             DistributionId=distribution_id,
             InvalidationBatch={
@@ -342,13 +405,16 @@ async def main(bucket_name, public_key, private_key, distribution_id, discord_we
 def lambda_handler(event, context):
     # Env vars
     bucket_name = os.getenv('TCGCSV_BUCKET_NAME')
+    tcgplayer_vault_bucket_name = os.getenv('TCGCSV_TCGPLAYER_VAULT_BUCKET_NAME')
+    frontend_bucket_name = os.getenv('TCGCSV_FRONTEND_BUCKET_NAME')
+    archive_bucket_name = os.getenv('TCGCSV_ARCHIVE_BUCKET_NAME')
     public_key = os.getenv('TCGPLAYER_PUBLIC_KEY')
     private_key = os.getenv('TCGPLAYER_PRIVATE_KEY')
     distribution_id = os.getenv('TCGCSV_DISTRIBUTION_ID')
     discord_webhook = os.getenv('TCGCSV_DISCORD_WEBHOOK')
 
     response = asyncio.run(
-        main(bucket_name, public_key, private_key, distribution_id, discord_webhook, dry_run=False)
+        main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, archive_bucket_name, public_key, private_key, distribution_id, discord_webhook, dry_run=False)
     )
 
     return response
@@ -358,11 +424,14 @@ if __name__ == '__main__':
     os.environ['AWS_SHARED_CREDENTIALS_FILE'] = f'{os.path.expanduser("~")}/.aws/personal_credentials'
 
     bucket_name = os.getenv('TCGCSV_BUCKET_NAME')
+    tcgplayer_vault_bucket_name = os.getenv('TCGCSV_TCGPLAYER_VAULT_BUCKET_NAME')
+    frontend_bucket_name = os.getenv('TCGCSV_FRONTEND_BUCKET_NAME')
+    archive_bucket_name = os.getenv('TCGCSV_ARCHIVE_BUCKET_NAME')
     public_key = os.getenv('TF_VAR_TCGPLAYER_PUBLIC_KEY')
     private_key = os.getenv('TF_VAR_TCGPLAYER_PRIVATE_KEY')
     distribution_id = os.getenv('TCGCSV_DISTRIBUTION_ID')
     discord_webhook = os.getenv('TF_VAR_TCGCSV_DISCORD_WEBHOOK')
 
     response = asyncio.run(
-        main(bucket_name, public_key, private_key, distribution_id, discord_webhook, dry_run=True)
+        main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, archive_bucket_name, public_key, private_key, distribution_id, discord_webhook, dry_run=True)
     )

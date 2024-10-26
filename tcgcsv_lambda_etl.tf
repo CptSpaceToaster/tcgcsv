@@ -35,6 +35,9 @@ resource "aws_lambda_function" "tcgcsv_lambda_etl" {
   environment {
     variables = {
       TCGCSV_BUCKET_NAME = aws_s3_bucket.tcgplayer_json_csv_vault.bucket
+      TCGCSV_TCGPLAYER_VAULT_BUCKET_NAME = aws_s3_bucket.tcgcsv_tcgplayer_vault.bucket
+      TCGCSV_FRONTEND_BUCKET_NAME = aws_s3_bucket.tcgcsv_frontend.bucket
+      TCGCSV_ARCHIVE_BUCKET_NAME = aws_s3_bucket.tcgcsv_archive.bucket
       TCGPLAYER_PUBLIC_KEY = var.TCGPLAYER_PUBLIC_KEY
       TCGPLAYER_PRIVATE_KEY = var.TCGPLAYER_PRIVATE_KEY
       TCGCSV_SHORTEN_DOMAIN = "https://${aws_apigatewayv2_domain_name.cpt.domain_name}"
