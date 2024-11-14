@@ -99,32 +99,32 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
   default_cache_behavior {
     cache_policy_id = aws_cloudfront_cache_policy.vault_cache.id
+    target_origin_id = local.s3_origin_id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.allow_cors.id
     allowed_methods = ["GET", "HEAD", "OPTIONS"]
     cached_methods = ["GET", "HEAD", "OPTIONS"]
-    target_origin_id = local.s3_origin_id
     viewer_protocol_policy = "redirect-to-https"
   }
 
   ordered_cache_behavior {
     path_pattern = "/tcgplayer/*"
+    target_origin_id = local.tcgplayer_vault_s3_origin_id
     cache_policy_id = aws_cloudfront_cache_policy.vault_cache.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.allow_cors.id
     allowed_methods = ["GET", "HEAD", "OPTIONS"]
     cached_methods = ["GET", "HEAD", "OPTIONS"]
-    target_origin_id = local.tcgplayer_vault_s3_origin_id
     viewer_protocol_policy = "redirect-to-https"
   }
 
-  # ordered_cache_behavior {
-  #   path_pattern = "/archive/*"
-  #   cache_policy_id = aws_cloudfront_cache_policy.long_lived_cache.id
-  #   response_headers_policy_id = aws_cloudfront_response_headers_policy.allow_cors.id
-  #   allowed_methods = ["GET", "HEAD", "OPTIONS"]
-  #   cached_methods = ["GET", "HEAD", "OPTIONS"]
-  #   target_origin_id = local.archive_s3_origin_id
-  #   viewer_protocol_policy = "redirect-to-https"
-  # }
+  ordered_cache_behavior {
+    path_pattern = "/archive/*"
+    target_origin_id = local.archive_s3_origin_id
+    cache_policy_id = aws_cloudfront_cache_policy.long_lived_cache.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.allow_cors.id
+    allowed_methods = ["GET", "HEAD", "OPTIONS"]
+    cached_methods = ["GET", "HEAD", "OPTIONS"]
+    viewer_protocol_policy = "redirect-to-https"
+  }
 
   price_class = "PriceClass_100"
 

@@ -292,9 +292,9 @@ async def main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, a
             # TODO: When removing the block below, this seek(0) also needs to go.
             archive7z_buffer.seek(0)
             await write_buffered_bytes(
-                s3_client,
+                archive_s3_client,
                 archive7z_buffer,
-                f'archive/{price_archive_name}',
+                f'archive/tcgplayer/{price_archive_name}',
                 price_archive_name,
             )
         archive7z_buffer.close()
