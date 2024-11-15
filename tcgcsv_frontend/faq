@@ -16,14 +16,14 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Poppins:wght@600&display=swap">
     <style>
       h3 { padding-block: 4px; margin-block-start: 62px; font-size: 1.4em; }
       h3:hover {
         opacity: 1;
         opacity: var(--h3-hover-opacity);
       }
-      main { margin-bottom: 128px; }
+      main { padding-block-end: 128px; }
     </style>
   </head>
   <body>
@@ -50,19 +50,19 @@
 
 pokemon_category = <span class="s">&#39;3&#39;</span>
 
-r = requests.get(f<span class="s">&quot;https://tcgcsv.com/<span class="u">{pokemon_category}</span>/groups&quot;</span>)
+r = requests.get(f<span class="s">&quot;https://tcgcsv.com/tcgplayer/<span class="u">{pokemon_category}</span>/groups&quot;</span>)
 all_groups = r.json()[<span class="s">&#39;results&#39;</span>]
 
 <b>for</b> group <b>in</b> all_groups:
     group_id = group[<span class="s">&#39;groupId&#39;</span>]
-    r = requests.get(f<span class="s">&quot;https://tcgcsv.com/<span class="u">{pokemon_category}</span>/<span class="u">{group_id}</span>/products&quot;</span>)
+    r = requests.get(f<span class="s">&quot;https://tcgcsv.com/tcgplayer/<span class="u">{pokemon_category}</span>/<span class="u">{group_id}</span>/products&quot;</span>)
     products = r.json()[<span class="s">&#39;results&#39;</span>]
 
     <b>for</b> product <b>in</b> products:
         <span class="c"># Process product information</span>
         <b>print</b>(f<span class="s">&quot;<span class="u">{product[</span>&#39;productId&#39;<span class="u">]}</span> - <span class="u">{product[</span>&#39;name&#39;<span class="u">]}</span>&quot;</span>)
 
-    r = requests.get(f<span class="s">&quot;https://tcgcsv.com/<span class="u">{pokemon_category}</span>/<span class="u">{group_id}</span>/prices&quot;</span>)
+    r = requests.get(f<span class="s">&quot;https://tcgcsv.com/tcgplayer/<span class="u">{pokemon_category}</span>/<span class="u">{group_id}</span>/prices&quot;</span>)
     prices = r.json()[<span class="s">&#39;results&#39;</span>]
 
     <b>for</b> price <b>in</b> prices:
@@ -76,7 +76,7 @@ all_groups = r.json()[<span class="s">&#39;results&#39;</span>]
       <p>TCGPlayer does not offer historcal price information, but TCGCSV does maintain a price archive that records prices daily. You can download price history from February 8, 2024 and onwards! (You will need <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.7-zip.org/download.html">7zip</a> to extract the archive)
       <p>For the technical folks out there:</p>
       <pre><code><div><span class="c"># Download archive</span>
-curl -O https://tcgcsv.com/archive/prices-2024-02-08.ppmd.7z
+curl -O https://tcgcsv.com/archive/tcgplayer/prices-2024-02-08.ppmd.7z
 
 <span class="c"># Extract</span>
 7z x prices-2024-02-08.ppmd.7z
@@ -87,7 +87,7 @@ cat 2024-02-08/3/3170/prices</div></code></pre>
         <ol>
           <li>Install <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.7-zip.org/download.html">7zip</a></li>
           <li>Download the archives you'd like to extract:
-          <br><a href="https://tcgcsv.com/archive/prices-2024-02-08.ppmd.7z">https://tcgcsv.com/archive/prices-2024-02-08.ppmd.7z</a></li>
+          <br><a href="https://tcgcsv.com/archive/tcgplayer/prices-2024-02-08.ppmd.7z">https://tcgcsv.com/archive/tcgplayer/prices-2024-02-08.ppmd.7z</a></li>
           <li>Anything before 2024-02-08 doesn't exist at the time of writing :(</li>
           <li>Use 7zip to extract the file you downloaded!</li>
         </ol>
@@ -107,7 +107,7 @@ cat 2024-02-08/3/3170/prices</div></code></pre>
       <p>For these reasons, I would strongly suggest skipping categories 21, 69, and 70 when processing all categories.</p>
       <pre><code><div><b>import</b> requests
 
-r = requests.get(<span class="s">&#39;https://tcgcsv.com/categories&#39;</span>)
+r = requests.get(<span class="s">&#39;https://tcgcsv.com/tcgplayer/categories&#39;</span>)
 all_categories = r.json()[<span class="s">&#39;results&#39;</span>]
 
 <b>for</b> category <b>in</b> all_categories:

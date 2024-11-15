@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Poppins:wght@600&display=swap">
   </head>
   <body>
     <header>
@@ -25,7 +25,7 @@
         <a target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/CptSpaceToaster/tcgcsv"><img alt="Github Repo" src="/github-mark.svg"></a>
         <a target="_blank" rel="noopener noreferrer nofollow" href="https://discord.gg/bydv2BNV25"><img alt="Join Discord" src="/discord-mark.svg"></a>
         <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.patreon.com/TCGCSV"><img alt="Support me on Patreon!" src="/patreon-symbol-mark.svg"></a>
-        <a target="_blank" rel="noopener noreferrer nofollow" href="https://cpt.tcgcsv.com"><img alt="TCGPlayer Affiliate Link" src="/TCGplayer-logo-primary.png"></a>
+        <a rel="noopener noreferrer nofollow" href="https://cpt.tcgcsv.com"><img alt="TCGPlayer Affiliate Link" src="/TCGplayer-logo-primary.png"></a>
       </nav>
       <nav class="internal-nav">
         Home
@@ -42,9 +42,24 @@
       </ul>
     </section>
     <section>
-      <h2>Updates</h2>
+      <div class="callout danger">
+        <h3>Upcoming Breaking Changes</h3>
+        <p>All paths to TCGPlayer data now use the path prefix <span style="font-family: monospace;">/tcgplayer</span>. All scripts or processes referencing data from TCGCSV should migrate their references using this new path prefix.</p>
+        <p>
+          Examples:
+          <ul>
+            <li><span style="font-family: monospace;">https://tcgcsv.com/categories</span> — <a target="_blank" rel="noopener noreferrer nofollow" href="tcgplayer/categories">https://tcgcsv.com/tcgplayer/categories</a></li>
+            <li><span style="font-family: monospace;">https://tcgcsv.com/3/604/ProductsAndPrices.csv</span> — <a target="_blank" rel="noopener noreferrer nofollow" href="tcgplayer/3/604/ProductsAndPrices.csv">https://tcgcsv.com/tcgplayer/3/604/ProductsAndPrices.csv</a></li>
+            <li><span style="font-family: monospace;">https://tcgcsv.com/archive/prices-2024-02-08.ppmd.7z</span> — <a target="_blank" rel="noopener noreferrer nofollow" href="tcgplayer/prices-2024-02-08.ppmd.7z">https://tcgcsv.com/archive/tcgplayer/prices-2024-02-08.ppmd.7z</a></li>
+          </ul>
+          The old paths will break sometime in the next couple of months. Please try and complete any migrations before Jan 1, 2025.
+        </p>
+      </div>
+    </section>
+    <section>
+      <h2>Daily Updates</h2>
       <p>
-        <div id="schedule">All content <i>should</i> update daily around 20:00:00 UTC</div>
+        <div id="schedule">All content <i>should</i> update everyday around 20:00:00 UTC</div>
         <div id="updated-at"><a target="_blank" rel="noopener noreferrer nofollow" href="last-updated.txt">Last updated</a> at: </div>
       </p>
     </section>
@@ -77,9 +92,9 @@
       </p>
       <details open>
         <summary>Root information</summary>
-        <p style="margin-top: 0;">
-          <a target="_blank" rel="noopener noreferrer nofollow" href="categories">Categories</a>
-          <a href="Categories.csv">Categories.csv</a>
+        <p style="margin-block-start: 8px;">
+          <a target="_blank" rel="noopener noreferrer nofollow" href="tcgplayer/categories">Categories</a>
+          <a href="tcgplayer/Categories.csv">Categories.csv</a>
         </p>
       </details>
       <details>
@@ -95,6 +110,8 @@
           <tbody id="category-table"></tbody>
         </table>
       </details>
+      <h2>Groups</h2>
+      <hr>
     </main>
     <footer>
       <h3>Special thanks to our friends:</h3>
@@ -175,7 +192,7 @@
       let groups = [];
       let groupsLength = 0
       if (![69, 70].includes(category.categoryId)) {
-        const groupsResponse = await fetch(`${category.categoryId}/groups`);
+        const groupsResponse = await fetch(`tcgplayer/${category.categoryId}/groups`);
         if (groupsResponse.status == 200) {
           groups = (await groupsResponse.json()).results;
           groups.sort((a, b) => {
@@ -187,6 +204,9 @@
 
       const summary = document.createElement('summary');
       summary.innerHTML = `${category.name} (${groupsLength})`;
+
+      detail.appendChild(summary);
+
       if (groupsLength === 0)
       {
         summary.classList.add('z');
@@ -199,17 +219,15 @@
               group.name,
               group.groupId,
               'Products',
-              `${category.categoryId}/${group.groupId}/products`,
+              `tcgplayer/${category.categoryId}/${group.groupId}/products`,
               'Prices',
-              `${category.categoryId}/${group.groupId}/prices`,
+              `tcgplayer/${category.categoryId}/${group.groupId}/prices`,
               'ProductsAndPrices.csv',
-              `${category.categoryId}/${group.groupId}/ProductsAndPrices.csv`,
+              `tcgplayer/${category.categoryId}/${group.groupId}/ProductsAndPrices.csv`,
             )
           });
         }
       }
-
-      detail.appendChild(summary);
     }
 
 
@@ -231,7 +249,7 @@
       updated.appendChild(document.createTextNode(lastUpdatedDate.toLocaleString('en-US', timestampOptions)));
 
       let categories = []
-      const categoriesResponse = await fetch("categories");
+      const categoriesResponse = await fetch("tcgplayer/categories");
       if (categoriesResponse.status == 200) {
         categories = (await categoriesResponse.json()).results;
         categories.sort((a, b) => {
@@ -250,9 +268,9 @@
           category.name,
           category.categoryId,
           'Groups',
-          `${category.categoryId}/groups`,
+          `tcgplayer/${category.categoryId}/groups`,
           'Groups.csv',
-          `${category.categoryId}/Groups.csv`
+          `tcgplayer/${category.categoryId}/Groups.csv`
         );
 
         addCategory(main, category);
