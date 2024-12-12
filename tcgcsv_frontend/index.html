@@ -17,6 +17,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Poppins:wght@600&display=swap">
+    <style>
+      h2:hover {
+        opacity: 1;
+        opacity: var(--h2-hover-opacity);
+      }
+    </style>
   </head>
   <body>
     <header>
@@ -43,7 +49,7 @@
     </section>
     <section>
       <div class="callout danger">
-        <h3>Upcoming Breaking Changes</h3>
+        <h2 id="breaking-changes">Upcoming Breaking Changes</h2>
         <p>All paths to TCGPlayer data now use the path prefix <span style="font-family: monospace;">/tcgplayer</span>. All scripts or processes referencing data from TCGCSV should migrate their references using this new path prefix.</p>
         <p>
           Examples:
@@ -57,14 +63,14 @@
       </div>
     </section>
     <section>
-      <h2>Daily Updates</h2>
+      <h2 id="daily-updates">Daily Updates</h2>
       <p>
         <div id="schedule">All content <i>should</i> update everyday around 20:00:00 UTC</div>
         <div id="updated-at"><a target="_blank" rel="noopener noreferrer nofollow" href="last-updated.txt">Last updated</a> at: </div>
       </p>
     </section>
     <main id="files">
-      <h2>Files</h2>
+      <h2 id="information-tiers">Files</h2>
       <p>TCGPlayer has 4 tiers of information.
         <ol>
           <li>
@@ -277,5 +283,35 @@
       });
     }
     load();
+  </script>
+  <script>
+    function onHashChange(event) {
+      const hash = window.location.hash.substring(1);
+      const headers = document.getElementsByTagName('h2');
+      for(let i = 0; i < headers.length; i++) {
+        if (headers[i].id) {
+          if (headers[i].id == hash) {
+            headers[i].classList.add("highlight");
+          } else {
+            headers[i].classList.remove("highlight");
+          }
+        }
+      }
+    }
+
+    addEventListener("hashchange", onHashChange);
+
+    const headers = document.getElementsByTagName('h2');
+    for(let i = 0; i < headers.length; i++) {
+      if (headers[i].id) {
+        headers[i].style.cursor = 'pointer';
+        headers[i].onclick = () => {
+          window.location.hash = headers[i].id;
+        }
+        headers[i].style.setProperty('--h2-hover-opacity', '0.85');
+      }
+    }
+
+    onHashChange(null);
   </script>
 </html>
