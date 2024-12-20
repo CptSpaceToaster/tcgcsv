@@ -15,7 +15,7 @@ resource "aws_lambda_function" "tcgcsv_lambda_url_expander" {
 
   environment {
     variables = {
-      TCGCSV_IMPACT_AFFILIATE_BASE_URL = "https://tcgplayer.pxf.io/tcgcsv"
+      TCGCSV_IMPACT_AFFILIATE_BASE_URL = "https://partner.tcgplayer.com/tcgcsv"
     }
   }
 }
