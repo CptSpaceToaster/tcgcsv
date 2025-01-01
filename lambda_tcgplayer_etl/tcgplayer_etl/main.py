@@ -41,7 +41,7 @@ def overwriteURL(product):
         product['url'] = shorten(product['productId'])
 
 
-async def main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, archive_bucket_name, public_key, private_key, distribution_id, discord_webhook, dry_run=True):
+async def main(tcgplayer_vault_bucket_name, frontend_bucket_name, archive_bucket_name, public_key, private_key, distribution_id, discord_webhook, dry_run=True):
     start = time.time()
 
     written_file_pairs = []
@@ -58,14 +58,6 @@ async def main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, a
     conn = aiohttp.TCPConnector(limit_per_host=MAX_CONCURRENCY, limit=0, ttl_dns_cache=300)
     async with aiohttp.ClientSession(connector=conn) as session:
         # Initialize s3
-        s3_client = None if dry_run else S3Client(
-            url=f"https://{bucket_name}.s3.us-east-1.amazonaws.com",
-            session=session,
-            access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-            secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-            session_token=os.getenv('AWS_SESSION_TOKEN'),
-        )
-
         tcgplayer_vault_s3_client = None if dry_run else S3Client(
             url=f"https://{tcgplayer_vault_bucket_name}.s3.us-east-1.amazonaws.com",
             session=session,
@@ -115,8 +107,8 @@ async def main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, a
         # Generate content
         total_requests += 1
         categories_response = await tcgplayer.get_categories()
-        categories_json_filename = '/categories'
-        categories_csv_filename = '/Categories.csv'
+        categories_json_filename = '/tcgplayer/categories'
+        categories_csv_filename = '/tcgplayer/Categories.csv'
         categories_hash = mj.hash(categories_response)
         categories = categories_response['results']
 
@@ -128,12 +120,10 @@ async def main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, a
                 print('Established Categories')
                 pprint.pp(categories_response)
             else:
-                await write_json(s3_client, categories_json_filename, categories_response)
-                await write_json(tcgplayer_vault_s3_client, '/tcgplayer' + categories_json_filename, categories_response)
+                await write_json(tcgplayer_vault_s3_client, categories_json_filename, categories_response)
                 written_file_pairs.append(categories_json_filename)
 
-                await write_csv(s3_client, categories_csv_filename, categories[0].keys(), categories, 'Categories.csv')
-                await write_csv(tcgplayer_vault_s3_client, '/tcgplayer' + categories_csv_filename, categories[0].keys(), categories, 'Categories.csv')
+                await write_csv(tcgplayer_vault_s3_client, categories_csv_filename, categories[0].keys(), categories, 'Categories.csv')
                 written_file_pairs.append(categories_csv_filename)
 
         semaphore = asyncio.Semaphore(MAX_CONCURRENCY)
@@ -148,8 +138,8 @@ async def main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, a
 
             async with semaphore:
                 groups_response = await tcgplayer.get_groups(category_id)
-                groups_json_filename = f'/{category_id}/groups'
-                groups_csv_filename = f'/{category_id}/Groups.csv'
+                groups_json_filename = f'/tcgplayer/{category_id}/groups'
+                groups_csv_filename = f'/tcgplayer/{category_id}/Groups.csv'
                 groups_hash = mj.hash(groups_response)
                 groups = groups_response['results']
                 suggested_csv_name = f"{category['name'].replace('&', 'And').replace(' ', '')}Groups.csv"
@@ -168,13 +158,11 @@ async def main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, a
                         print(f'{category_id} Established Groups')
                         pprint.pp(groups_response)
                     else:
-                        await write_json(s3_client, groups_json_filename, groups_response)
-                        await write_json(tcgplayer_vault_s3_client, '/tcgplayer' + groups_json_filename, groups_response)
+                        await write_json(tcgplayer_vault_s3_client, groups_json_filename, groups_response)
                         written_file_pairs.append(groups_json_filename)
 
                         keys = [] if len(groups) == 0 else groups[0].keys()
-                        await write_csv(s3_client, groups_csv_filename, keys, groups, suggested_csv_name)
-                        await write_csv(tcgplayer_vault_s3_client, '/tcgplayer' + groups_csv_filename, keys, groups, suggested_csv_name)
+                        await write_csv(tcgplayer_vault_s3_client, groups_csv_filename, keys, groups, suggested_csv_name)
                         written_file_pairs.append(groups_csv_filename)
 
         # TODO: Is there any way I can start the second process without blocking here like before with threads?
@@ -192,10 +180,11 @@ async def main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, a
             async with semaphore:
                 products_response = await tcgplayer.get_products_for_group(group_id)
                 prices_response = await tcgplayer.get_prices_for_group(group_id)
-                products_json_filename = f'/{category_id}/{group_id}/products'
-                prices_json_filename = f'/{category_id}/{group_id}/prices'
+                products_json_filename = f'/tcgplayer/{category_id}/{group_id}/products'
+                prices_json_filename = f'/tcgplayer/{category_id}/{group_id}/prices'
+                # TODO: The files in the price archive are not prefixed with `/tcgplayer` currently
                 prices_json_archive_filename = f'{time.strftime("%Y-%m-%d", time.localtime())}/{category_id}/{group_id}/prices'
-                products_and_prices_csv_filename = f'/{category_id}/{group_id}/ProductsAndPrices.csv'
+                products_and_prices_csv_filename = f'/tcgplayer/{category_id}/{group_id}/ProductsAndPrices.csv'
                 products_hash = mj.hash(products_response)
                 prices_hash = mj.hash(prices_response)
                 suggested_csv_name = f"{group['name'].replace('&', 'And').replace(' ', '').replace(':', '').replace('.', '').replace('/', '-')}ProductsAndPrices.csv"
@@ -215,8 +204,7 @@ async def main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, a
                             print(f'{category_id}/{group_id} Established Products')
                             # pprint.pp(products_response)
                         else:
-                            await write_json(s3_client, products_json_filename, products_response)
-                            await write_json(tcgplayer_vault_s3_client, '/tcgplayer' + products_json_filename, products_response)
+                            await write_json(tcgplayer_vault_s3_client, products_json_filename, products_response)
                             written_file_pairs.append(products_json_filename)
 
                     if prices_hash != manifest.get(prices_json_filename):
@@ -226,8 +214,7 @@ async def main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, a
                             print(f'{category_id}/{group_id} Established Prices')
                             # pprint.pp(prices_response)
                         else:
-                            await write_json(s3_client, prices_json_filename, prices_response)
-                            await write_json(tcgplayer_vault_s3_client, '/tcgplayer' + prices_json_filename, prices_response)
+                            await write_json(tcgplayer_vault_s3_client, prices_json_filename, prices_response)
                             written_file_pairs.append(prices_json_filename)
 
                     products = products_response['results']
@@ -263,8 +250,7 @@ async def main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, a
                         print(f'{category_id}/{group_id} Established Products and Prices')
                         # pprint.pp(products_to_write)
                     else:
-                        await write_csv(s3_client, products_and_prices_csv_filename, fieldnames, products_to_write, suggested_csv_name)
-                        await write_csv(tcgplayer_vault_s3_client, '/tcgplayer' + products_and_prices_csv_filename, fieldnames, products_to_write, suggested_csv_name)
+                        await write_csv(tcgplayer_vault_s3_client, products_and_prices_csv_filename, fieldnames, products_to_write, suggested_csv_name)
                         written_file_pairs.append(products_and_prices_csv_filename)
 
         await asyncio.gather(*(
@@ -286,15 +272,7 @@ async def main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, a
             await write_buffered_bytes(
                 archive_s3_client,
                 archive7z_buffer,
-                f'/archive/{price_archive_name}',
-                price_archive_name,
-            )
-            # TODO: When removing the block below, this seek(0) also needs to go.
-            archive7z_buffer.seek(0)
-            await write_buffered_bytes(
-                archive_s3_client,
-                archive7z_buffer,
-                f'archive/tcgplayer/{price_archive_name}',
+                f'/archive/tcgplayer/{price_archive_name}',
                 price_archive_name,
             )
         archive7z_buffer.close()
@@ -326,27 +304,15 @@ async def main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, a
             # Remove files from manifest and bucket
             had_trouble_deleting = {}
             removed_files.sort()
-            for group, items in groupby(removed_files, lambda x: "/".join(x.split("/", 3)[:3])):
+            for group, items in groupby(removed_files, lambda x: "/".join(x.split("/", 4)[:4])):
                 for item in items:
-                    async with tcgplayer_vault_s3_client.delete('/tcgplayer' + item) as resp:
-                        if resp.status != HTTPStatus.NO_CONTENT:
-                            # had_trouble_deleting.append[item] = resp.status
-                            pass
-                        else:
-                            # del manifest[item]
-                            pass
-
-                    async with s3_client.delete(item) as resp:
+                    async with tcgplayer_vault_s3_client.delete(item) as resp:
                         if resp.status != HTTPStatus.NO_CONTENT:
                             had_trouble_deleting.append[item] = resp.status
                         else:
                             del manifest[item]
 
-                async with tcgplayer_vault_s3_client.delete(f'/tcgplayer{group}/ProductsAndPrices.csv') as resp:
-                    if resp.status != HTTPStatus.NO_CONTENT:
-                        # had_trouble_deleting.append[f'/tcgplayer{group}/ProductsAndPrices.csv'] = resp.status
-                        pass
-                async with s3_client.delete(f'{group}/ProductsAndPrices.csv') as resp:
+                async with tcgplayer_vault_s3_client.delete(f'{group}/ProductsAndPrices.csv') as resp:
                     if resp.status != HTTPStatus.NO_CONTENT:
                         had_trouble_deleting.append[f'{group}/ProductsAndPrices.csv'] = resp.status
 
@@ -362,28 +328,19 @@ async def main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, a
             written_file_pairs.append(tcgplayer_manifest_filename)
 
             await write_txt(frontend_s3_client, '/last-updated.txt', timestamp)
-            await write_txt(s3_client, '/last-updated.txt', timestamp)
             written_file_pairs.append('/last-updated.txt')
 
     delta = time.time() - start
 
     if not dry_run:
-        # cf.create_invalidation(
-        #     DistributionId=distribution_id,
-        #     InvalidationBatch={
-        #         'Paths': {
-        #             'Quantity': 1,
-        #             'Items': ['/tcgplayer/*', '/last-updated.txt'],
-        #         },
-        #         'CallerReference': str(time.time()).replace(".", "")
-        #     }
-        # )
+        invalidation_items = ['/last-updated.txt', '/tcgplayer/*']
+
         cf.create_invalidation(
             DistributionId=distribution_id,
             InvalidationBatch={
                 'Paths': {
-                    'Quantity': 1,
-                    'Items': ['/*'],
+                    'Quantity': len(invalidation_items),
+                    'Items': invalidation_items,
                 },
                 'CallerReference': str(time.time()).replace(".", "")
             }
@@ -404,7 +361,6 @@ async def main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, a
 
 def lambda_handler(event, context):
     # Env vars
-    bucket_name = os.getenv('TCGCSV_BUCKET_NAME')
     tcgplayer_vault_bucket_name = os.getenv('TCGCSV_TCGPLAYER_VAULT_BUCKET_NAME')
     frontend_bucket_name = os.getenv('TCGCSV_FRONTEND_BUCKET_NAME')
     archive_bucket_name = os.getenv('TCGCSV_ARCHIVE_BUCKET_NAME')
@@ -414,7 +370,7 @@ def lambda_handler(event, context):
     discord_webhook = os.getenv('TCGCSV_DISCORD_WEBHOOK')
 
     response = asyncio.run(
-        main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, archive_bucket_name, public_key, private_key, distribution_id, discord_webhook, dry_run=False)
+        main(tcgplayer_vault_bucket_name, frontend_bucket_name, archive_bucket_name, public_key, private_key, distribution_id, discord_webhook, dry_run=False)
     )
 
     return response
@@ -423,7 +379,6 @@ def lambda_handler(event, context):
 if __name__ == '__main__':
     os.environ['AWS_SHARED_CREDENTIALS_FILE'] = f'{os.path.expanduser("~")}/.aws/personal_credentials'
 
-    bucket_name = os.getenv('TCGCSV_BUCKET_NAME')
     tcgplayer_vault_bucket_name = os.getenv('TCGCSV_TCGPLAYER_VAULT_BUCKET_NAME')
     frontend_bucket_name = os.getenv('TCGCSV_FRONTEND_BUCKET_NAME')
     archive_bucket_name = os.getenv('TCGCSV_ARCHIVE_BUCKET_NAME')
@@ -433,5 +388,5 @@ if __name__ == '__main__':
     discord_webhook = os.getenv('TF_VAR_TCGCSV_DISCORD_WEBHOOK')
 
     response = asyncio.run(
-        main(bucket_name, tcgplayer_vault_bucket_name, frontend_bucket_name, archive_bucket_name, public_key, private_key, distribution_id, discord_webhook, dry_run=True)
+        main(tcgplayer_vault_bucket_name, frontend_bucket_name, archive_bucket_name, public_key, private_key, distribution_id, discord_webhook, dry_run=True)
     )

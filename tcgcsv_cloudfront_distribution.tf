@@ -67,12 +67,6 @@ resource "aws_cloudfront_origin_access_control" "S3_OA" {
 
 resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
-    domain_name = aws_s3_bucket.tcgplayer_json_csv_vault.bucket_regional_domain_name
-    origin_id = local.s3_origin_id
-    origin_access_control_id = aws_cloudfront_origin_access_control.S3_OA.id
-  }
-
-  origin {
     domain_name = aws_s3_bucket.tcgcsv_tcgplayer_vault.bucket_regional_domain_name
     origin_id = local.tcgplayer_vault_s3_origin_id
     origin_access_control_id = aws_cloudfront_origin_access_control.S3_OA.id
@@ -99,7 +93,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
   default_cache_behavior {
     cache_policy_id = aws_cloudfront_cache_policy.vault_cache.id
-    target_origin_id = local.s3_origin_id
+    target_origin_id = local.frontend_s3_origin_id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.allow_cors.id
     allowed_methods = ["GET", "HEAD", "OPTIONS"]
     cached_methods = ["GET", "HEAD", "OPTIONS"]

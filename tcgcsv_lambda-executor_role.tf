@@ -16,7 +16,6 @@ data aws_iam_policy_document lambda_s3 {
     ]
 
     resources = [
-      "${aws_s3_bucket.tcgplayer_json_csv_vault.arn}",
       "${aws_s3_bucket.tcgcsv_tcgplayer_vault.arn}",
       "${aws_s3_bucket.tcgcsv_frontend.arn}",
       "${aws_s3_bucket.tcgcsv_archive.arn}"
@@ -33,7 +32,6 @@ data aws_iam_policy_document lambda_s3 {
     ]
 
     resources = [
-      "${aws_s3_bucket.tcgplayer_json_csv_vault.arn}/*",
       "${aws_s3_bucket.tcgcsv_tcgplayer_vault.arn}/*",
       "${aws_s3_bucket.tcgcsv_frontend.arn}/*",
       "${aws_s3_bucket.tcgcsv_archive.arn}/*"
