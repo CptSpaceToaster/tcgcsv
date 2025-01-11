@@ -49,16 +49,16 @@
     </section>
     <section>
       <div class="callout danger">
-        <h2 id="breaking-changes">Upcoming Breaking Changes</h2>
+        <h2 id="breaking-changes">Did your script break?</h2>
         <p>All paths to TCGPlayer data now use the path prefix <span style="font-family: monospace;">/tcgplayer</span>. All scripts or processes referencing data from TCGCSV should migrate their references using this new path prefix.</p>
         <p>
           Examples:
           <ul>
             <li><span style="font-family: monospace;">https://tcgcsv.com/categories</span> — <a target="_blank" rel="noopener noreferrer nofollow" href="tcgplayer/categories">https://tcgcsv.com/tcgplayer/categories</a></li>
             <li><span style="font-family: monospace;">https://tcgcsv.com/3/604/ProductsAndPrices.csv</span> — <a target="_blank" rel="noopener noreferrer nofollow" href="tcgplayer/3/604/ProductsAndPrices.csv">https://tcgcsv.com/tcgplayer/3/604/ProductsAndPrices.csv</a></li>
-            <li><span style="font-family: monospace;">https://tcgcsv.com/archive/prices-2024-02-08.ppmd.7z</span> — <a target="_blank" rel="noopener noreferrer nofollow" href="tcgplayer/prices-2024-02-08.ppmd.7z">https://tcgcsv.com/archive/tcgplayer/prices-2024-02-08.ppmd.7z</a></li>
+            <li><span style="font-family: monospace;">https://tcgcsv.com/archive/prices-2024-02-08.ppmd.7z</span> — <a target="_blank" rel="noopener noreferrer nofollow" href="archive/tcgplayer/prices-2024-02-08.ppmd.7z">https://tcgcsv.com/archive/tcgplayer/prices-2024-02-08.ppmd.7z</a></li>
           </ul>
-          The old paths will break sometime in the next couple of months. Please try and complete any migrations before Jan 1, 2025.
+          The old paths are no longer available as of Jan 1, 2025.
         </p>
       </div>
     </section>
@@ -121,7 +121,7 @@
     </main>
     <footer>
       <h3>Special thanks to our friends:</h3>
-      <ul>
+      <ul id="last-element" style="margin-bottom:1000px;">
         <li>luceleaftea for maintaining a separate pile of CSVs on <a target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/the-fab-cube/flesh-and-blood-cards">Github</a> for Flesh and Blood</li>
         <li>nago for hosting a wonderful pile of pokemon related assets over at <a target="_blank" rel="noopener noreferrer nofollow" href="https://malie.io/static/">Malie.io</a></li>
         <li>ZeldaZach for helping answer questions in TCGPlayer's discord with me, while also maintaining <a target="_blank" rel="noopener noreferrer nofollow" href="https://mtgjson.com">MTGJSON.com</a></li>
@@ -281,6 +281,9 @@
 
         addCategory(main, category);
       });
+
+      lastElement = document.getElementById('last-element');
+      lastElement.style = null
     }
     load();
   </script>
