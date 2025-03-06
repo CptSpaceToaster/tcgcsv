@@ -1,10 +1,10 @@
 # https://tcgcsv.com
 
-⚠️ It's a mess in here... please be kind ⚠️
+Thanks for taking a look!
 
 ### Project setup
 
-The current development environment relies on pyenv & poetry, and some setup instructions I haven't written yet. Please message me on discord if you're looking to get things running, and I can prioritize writing instructions here.
+The current development environment relies on pyenv & poetry, and some setup instructions I haven't written yet. Please message me on discord if you're looking to get things running, and I can prioritize writing additional instructions to help answer any questions.
 
 To install the AWS CLI
 ```

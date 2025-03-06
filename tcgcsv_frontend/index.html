@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Poppins:wght@600&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Poppins:wght@600">
     <style>
       h2:hover {
         opacity: 1;
@@ -40,32 +40,17 @@
     </header>
     <section>
       <h2>Ahoy!</h2>
-      <p>This website is a hobby project that exposes categories, groups, products, and prices from TCGPlayer's API. The results are shared here for folks who can't get access to TCGPlayer's API. All responses used to generate the content on this website are cached as unmodified JSON text-files. The CSV's that I've put together DO have my personal affiliate links in there.</p>
+      <p>This website lets you download information including the prices of trading cards and products in a spreadsheet (CSV). It also functions as a public entrypoint for information from TCGPlayer's API including categories, groups, products, and prices if you prefer to work with JSON.</p>
       <ul>
-        <li>You can see my terraform learnings, AWS infrastructure, and open source mess for this website on <a target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/CptSpaceToaster/tcgcsv">Github</a></li>
+        <li>You can see my terraform learnings, AWS infrastructure, and source for this website on <a target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/CptSpaceToaster/tcgcsv">Github</a></li>
         <li>You can join this <a target="_blank" rel="noopener noreferrer nofollow" href="https://discord.gg/bydv2BNV25">discord</a> to contact me, get updates, and talk about what would be cool to have next!</li>
         <li>If you would like to support this project, you can become a member on <a href="https://www.patreon.com/TCGCSV">Patreon</a> to help keep the lights on!</li>
       </ul>
     </section>
     <section>
-      <div class="callout danger">
-        <h2 id="breaking-changes">Did your script break?</h2>
-        <p>All paths to TCGPlayer data now use the path prefix <span style="font-family: monospace;">/tcgplayer</span>. All scripts or processes referencing data from TCGCSV should migrate their references using this new path prefix.</p>
-        <p>
-          Examples:
-          <ul>
-            <li><span style="font-family: monospace;">https://tcgcsv.com/categories</span> — <a target="_blank" rel="noopener noreferrer nofollow" href="tcgplayer/categories">https://tcgcsv.com/tcgplayer/categories</a></li>
-            <li><span style="font-family: monospace;">https://tcgcsv.com/3/604/ProductsAndPrices.csv</span> — <a target="_blank" rel="noopener noreferrer nofollow" href="tcgplayer/3/604/ProductsAndPrices.csv">https://tcgcsv.com/tcgplayer/3/604/ProductsAndPrices.csv</a></li>
-            <li><span style="font-family: monospace;">https://tcgcsv.com/archive/prices-2024-02-08.ppmd.7z</span> — <a target="_blank" rel="noopener noreferrer nofollow" href="archive/tcgplayer/prices-2024-02-08.ppmd.7z">https://tcgcsv.com/archive/tcgplayer/prices-2024-02-08.ppmd.7z</a></li>
-          </ul>
-          The old paths are no longer available as of Jan 1, 2025.
-        </p>
-      </div>
-    </section>
-    <section>
       <h2 id="daily-updates">Daily Updates</h2>
       <p>
-        <div id="schedule">All content <i>should</i> update everyday around 20:00:00 UTC</div>
+        <div id="schedule">All content updates everyday around 20:00:00 UTC</div>
         <div id="updated-at"><a target="_blank" rel="noopener noreferrer nofollow" href="last-updated.txt">Last updated</a> at: </div>
       </p>
     </section>
