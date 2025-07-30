@@ -33,7 +33,7 @@
         <a target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/CptSpaceToaster/tcgcsv"><img alt="Github Repo" src="/github-mark.svg"></a>
         <a target="_blank" rel="noopener noreferrer nofollow" href="https://discord.gg/bydv2BNV25"><img alt="Join Discord" src="/discord-mark.svg"></a>
         <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.patreon.com/TCGCSV"><img alt="Support me on Patreon!" src="/patreon-symbol-mark.svg"></a>
-        <a target="_blank" rel="noopener noreferrer nofollow" href="https://cpt.tcgcsv.com"><img alt="TCGPlayer Affiliate Link" src="/TCGplayer-logo-primary.png"></a>
+        <a target="_blank" rel="noopener noreferrer nofollow" href="https://cpt.tcgcsv.com"><img alt="TCGplayer Affiliate Link" src="/tcgplayer-mark.svg"></a>
       </nav>
       <nav class="internal-nav">
         <a href="/">Home</a>
@@ -73,7 +73,7 @@ all_groups = r.json()[<span class="s">&#39;results&#39;</span>]
     </div></code></pre>
 
       <h3 id="price-archive">Are there any past prices available?</h3>
-      <p>TCGPlayer does not offer historcal price information, but TCGCSV does maintain a price archive that records prices daily. You can download price history from February 8, 2024 and onwards! (You will need <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.7-zip.org/download.html">7zip</a> to extract the archive)
+      <p>TCGplayer does not offer historcal price information, but TCGCSV does maintain a price archive that records prices daily. You can download price history from February 8, 2024 and onwards! (You will need <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.7-zip.org/download.html">7zip</a> to extract the archive)
       <p>For the technical folks out there:</p>
       <pre><code><div><span class="c"># Download archive</span>
 curl -O https://tcgcsv.com/archive/tcgplayer/prices-2024-02-08.ppmd.7z
@@ -99,11 +99,11 @@ cat 2024-02-08/3/3170/prices</div></code></pre>
       <p>This website is just a hobby and a one-man show. The best place to reach the maintainer (CptSpaceToaster) is probably <a target="_blank" rel="noopener noreferrer nofollow" href="https://discord.gg/bydv2BNV25">discord</a>.</p>
 
       <h3 id="individual-listings">Can I look at individual listings or see sales for a specific product?</h3>
-      <p>Unfortunately no. This information isn't quite available to API users because TCGPlayer's API does not allow users to crawl individual listings. The <span class="mono">lowPrice</span> is the closest approximation TCGPlayer offers for the <i>lowest price listing</i>. With your own API access, you can pursue data at the SKU level and get a little more accurate information about the true "lowest listing" but the API does not divuldge much more than averages.</p>
+      <p>Unfortunately no. This information isn't quite available to API users because TCGplayer's API does not allow users to crawl individual listings. The <span class="mono">lowPrice</span> is the closest approximation TCGplayer offers for the <i>lowest price listing</i>. With your own API access, you can pursue data at the SKU level and get a little more accurate information about the true "lowest listing" but the API does not divuldge much more than averages.</p>
 
       <h3 id="missing-categories">What's with Categories 21, 69, and 70?</h3>
-      <p>Category 21 is <i>My Little Pony</i>, but Category 28 is <i>My Little Pony CCG</i>. Category 21 does not have any groups and has been mostly removed from TCGPlayer's side. You want Category 28 instead.</p>
-      <p>Categories 69 and 70 indicate that TCGPlayer attempted to categorize comic books at one point... and then stopped. Unlike category 21, these two categories have 1000's of groups available, however every group is empty (no products). These empty product-lists are <b>not</b> available to save on processing time.</p>
+      <p>Category 21 is <i>My Little Pony</i>, but Category 28 is <i>My Little Pony CCG</i>. Category 21 does not have any groups and has been mostly removed from TCGplayer's side. You want Category 28 instead.</p>
+      <p>Categories 69 and 70 indicate that TCGplayer attempted to categorize comic books at one point... and then stopped. Unlike category 21, these two categories have 1000's of groups available, however every group is empty (no products). These empty product-lists are <b>not</b> available to save on processing time.</p>
       <p>For these reasons, I would strongly suggest skipping categories 21, 69, and 70 when processing all categories.</p>
       <pre><code><div><b>import</b> requests
 
@@ -118,19 +118,19 @@ all_categories = r.json()[<span class="s">&#39;results&#39;</span>]
     <span class="c"># Process the other categories normally</span></div></code></pre>
 
       <h3 id="price-parking">Why are some of the listed high prices absurd, unusually large, and "just bananas"?</h3>
-      <p>A lot of sellers on TCGPlayer engage in <b>Price Parking</b>: when a seller sets the price of a product to <i>thousands</i> of dollars so noone buys it. I don't know why sellers do this, but my guess is that a seller would want to park a card so they don't have to pick the card's set, printing, and condition if they want to list the card for sale again.</p>
-      <p>For that reason, the <span class="mono">highPrice</span> isn't very useful from TCGPlayer's data.</p>
+      <p>A lot of sellers on TCGplayer engage in <b>Price Parking</b>: when a seller sets the price of a product to <i>thousands</i> of dollars so noone buys it. I don't know why sellers do this, but my guess is that a seller would want to park a card so they don't have to pick the card's set, printing, and condition if they want to list the card for sale again.</p>
+      <p>For that reason, the <span class="mono">highPrice</span> isn't very useful from TCGplayer's data.</p>
 
-      <h3 id="tcgplayer-api-access">How can I get my own TCGPlayer API access?</h3>
-      <p>TCGPlayer moved to a slightly more involved process, and hasn't been readily handing out new API Keys. Rather than "ask first, then build", try to build out as much of your application as possible without a key. Once you have an app started you can contact them about their <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/docs/tcgplayer-affiliate-program">affiliate program</a> and show off what you're building. Then you will be in a great spot to request additional API access if needed!</p>
+      <h3 id="tcgplayer-api-access">How can I get my own TCGplayer API access?</h3>
+      <p>TCGplayer moved to a slightly more involved process, and hasn't been readily handing out new API Keys. Rather than "ask first, then build", try to build out as much of your application as possible without a key. Once you have an app started you can contact them about their <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/docs/tcgplayer-affiliate-program">affiliate program</a> and show off what you're building. Then you will be in a great spot to request additional API access if needed!</p>
 
-      <h3 id="tcgplayer-api-compatibility">Is it easy to migrate from TCGCSV to TCGPlayer's API?</h3>
-      <p>The cached files and JSON responses are sourced <i>directly</i> from TCGPlayer's API (They just might be ~24 hours old). The JSON data and properties should match exactly what you would get from their API directly. Migrating over to their API should be straight forward.
+      <h3 id="tcgplayer-api-compatibility">Is it easy to migrate from TCGCSV to TCGplayer's API?</h3>
+      <p>The cached files and JSON responses are sourced <i>directly</i> from TCGplayer's API (They just might be ~24 hours old). The JSON data and properties should match exactly what you would get from their API directly. Migrating over to their API should be straight forward.
         Some considerations:
         <ul>
-          <li>TCGPlayer's paged data is collated here. You will need to walk pages of 100 items at a time as you interact with their endpoints and collections.</li>
-          <li>TCGPlayer's product endpoint returns a 404 and a JSON error for empty content. You may need to normalize certain edge cases such as when a group doesn't have any products.</li>
-          <li>TCGPlayer does not offer archived prices</li>
+          <li>TCGplayer's paged data is collated here. You will need to walk pages of 100 items at a time as you interact with their endpoints and collections.</li>
+          <li>TCGplayer's product endpoint returns a 404 and a JSON error for empty content. You may need to normalize certain edge cases such as when a group doesn't have any products.</li>
+          <li>TCGplayer does not offer archived prices</li>
         </ul>
       </p>
 
