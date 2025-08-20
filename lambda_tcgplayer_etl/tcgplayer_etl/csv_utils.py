@@ -9,7 +9,7 @@ import aiohttp_s3_client
 PART_SIZE = 5 * 1024 * 1024  # 5MB
 
 
-async def write_json(client: aiohttp_s3_client.S3Client, filename: str, results: dict, content_type: str = 'text/json'):
+async def write_json(client: aiohttp_s3_client.S3Client, filename: str, results: dict, content_type: str = 'application/json'):
     def dict_sender(results: dict, chunk_size: int):
         with io.BytesIO(json.dumps(results).encode('utf-8')) as buffer:
             while True:
