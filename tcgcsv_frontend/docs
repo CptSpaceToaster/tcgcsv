@@ -1,0 +1,227 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="TCGCSV"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="http://tcgcsv.com/docs"/>
+    <meta property="og:description" content="TCGCSV documentation."/>
+    <meta name="description" content="TCGCSV documentation."/>
+    <meta name="theme-color" content="#663399">
+    <title>TCGCSV</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Poppins:wght@600">
+    <style>
+      h3 { padding-block: 4px; margin-block-start: 62px; font-size: 1.4em; }
+      h3:hover { opacity: 1; opacity: var(--h3-hover-opacity); }
+      main { padding-inline-start: 0; }
+      #main { display: grid; grid-template-columns: 240px minmax(0, 1fr); }
+      #sidebar-nav { padding: 16px; display: flex; flex-direction: column; background-color: #F2F2F2; gap: 2px; }
+      #documentation { margin-inline-start: 16px; margin-block-end: 128px; }
+      pre { overflow-x: scroll; background-color: #F2F2F2; }
+
+      .docProps { display: flex; flex-direction: column; gap: 2px; padding: 2px; background: grey; font-size: 10pt; }
+      .docProps>div { padding: 2px 8px; background: white; }
+      .docKey { font-size: 14pt; font-weight: 500; text-decoration: underline; }
+      .docType { font-size: 9pt; }
+
+      @media (max-width: 768px) {
+        section, main, footer { padding-inline: 0; }
+        #main { grid-template-columns: minmax(0, 1fr); }
+        #documentation { margin-inline: 8px; }
+      }
+
+      @media (prefers-color-scheme: dark) {
+        pre { overflow-x: scroll; background-color: #111; }
+        #sidebar-nav { background-color: #111 }
+        .docProps>div { background: black; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>TCGCSV</h1>
+      <nav class="external-nav">
+        <a target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/CptSpaceToaster/tcgcsv"><img alt="Github Repo" src="/github-mark.svg"></a>
+        <a target="_blank" rel="noopener noreferrer nofollow" href="https://discord.gg/bydv2BNV25"><img alt="Join Discord" src="/discord-mark.svg"></a>
+        <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.patreon.com/TCGCSV"><img alt="Support me on Patreon!" src="/patreon-symbol-mark.svg"></a>
+        <a target="_blank" rel="noopener noreferrer nofollow" href="https://cpt.tcgcsv.com"><img alt="TCGplayer Affiliate Link" src="/tcgplayer-mark.svg"></a>
+      </nav>
+      <nav class="internal-nav">
+        <a href="/">Home</a>
+        <a href="/faq">FAQs</a>
+        Docs
+      </nav>
+    </header>
+    <main>
+      <div id="main">
+        <div id="sidebar-nav"></div>
+        <div id="documentation">
+          <h2>Documentation</h2>
+          <p>See something wrong or out of place? Reach out on <a target="_blank" rel="noopener noreferrer nofollow" href="https://discord.gg/bydv2BNV25">discord</a> or submit an <a target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/CptSpaceToaster/tcgcsv/issues">issue on Github</a> to ask a question or offer a correction!</p>
+          <h3 id="TCGplayer">TCGplayer</h3>
+          <p>The bulk of the information offered here from TCGplayer is a direct export from their API endpoints. When relevent, this documentation will link to the TCGplayer API endpoints that yielded the cached response.</p>
+          <p>Almost all endpoints from their API yield responses with the following format:</p>
+          <pre><code><div class="s"><span class="z">{</span>
+    "totalItems"<span class="z">: </span><span class="b">440</span><span class="z">,</span>
+    "success"<span class="z">: <span class="r">true</span><span class="z">,</span></span>
+    "errors"<span class="z">: []<span class="z">,</span></span>
+    "results"<span class="z">: [</span>
+        <span class="c">// ...</span>
+    <span class="z">]
+}</span>
+
+</div></code></pre>
+          <div class="docProps">
+            <div>
+              <div><span class="docKey">totalItems</span> <span class="docType z">int32</span></div>
+              Total number of result objects.
+            </div>
+            <div>
+              <div><span class="docKey">success</span> <span class="docType z">boolean</span></div>
+              Indicates whether the request was successful.
+            </div>
+            <div>
+              <div><span class="docKey">errors</span> <span class="docType z">list</span></div>
+              A list of error descriptions if the request was unsuccessful.
+            </div>
+            <div>
+              <div><span class="docKey">results</span> <span class="docType z">list</span></div>
+              An array of JSON objects containing result objects.
+            </div>
+          </div>
+          <h3 id="TCGplayer-categories-collection">Categories Collection</h3>
+          <p>TCGplayer uses categories to roughly translate to a card game or a collection of merchandise.</p>
+          <p>The cached response returns information from TCGplayer's <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/reference/catalog_getcategories-1">Categories</a> endpoint.</p>
+          <p>Example URL: <a target="_blank" rel="noopener noreferrer nofollow" href="https://tcgcsv.com/tcgplayer/categories">https://tcgcsv.com/tcgplayer/categories</a> </p>
+          <p>Example JSON response:</p>
+          <pre><code><div class="s"><span class="z">{</span>
+    "totalItems"<span class="z">: </span><span class="b">89</span><span class="z">,</span>
+    "success"<span class="z">: <span class="r">true</span><span class="z">,</span></span>
+    "errors"<span class="z">: []<span class="z">,</span></span>
+    "results"<span class="z">: [</span>
+        <span class="c">// ...</span>
+
+        <span class="z">{</span>
+            "categoryId"<span class="z">: </span><span class="b">3</span><span class="z">,</span>
+            "name"<span class="z">: </span>"Pokemon"<span class="z">,</span>
+            "modifiedOn"<span class="z">: </span>"2025-11-19T15:58:35.27"<span class="z">,</span>
+            "displayName"<span class="z">: </span>"Pokemon"<span class="z">,</span>
+            "seoCategoryName"<span class="z">: </span>"Pokemon"<span class="z">,</span>
+            "categoryDescription"<span class="z">: </span>"Trainers, your Pokémon adventure starts here! Whether you're a champ in the making or trying to catch 'em all from the latest sets, browse and buy Pokémon cards, booster boxes, Elite Trainer Boxes, and card packs at the best prices from thousands of sellers."<span class="z">,</span>
+            "categoryPageTitle"<span class="z">: </span>"TCGplayer - Buy Pokémon TCG Cards, Singles, and Pack"<span class="z">,</span>
+            "sealedLabel"<span class="z">: </span>"Sealed Products"<span class="z">,</span>
+            "nonSealedLabel"<span class="z">: </span>"Single Cards"<span class="z">,</span>
+            "conditionGuideUrl"<span class="z">: </span>"https://store.tcgplayer.com/help/cardconditionguide"<span class="z">,</span>
+            "isScannable"<span class="z">: </span><span class="r">true</span><span class="z">,</span>
+            "popularity"<span class="z">: </span><span class="b">576635</span><span class="z">,</span>
+            "isDirect"<span class="z">: </span><span class="r">true</span>
+        <span class="z">},</span>
+
+        <span class="c">// ...</span>
+    <span class="z">]
+}</span>
+
+</div></code></pre>
+          <div class="docProps">
+            <div>
+              <div><span class="docKey">categoryId</span> <span class="docType z">int32</span></div>
+              Unique incrementing integer ID. Safe to use as a primary key.
+            </div>
+            <div>
+              <div><span class="docKey">name</span> <span class="docType z">string</span></div>
+              Internal name. Frequently, this is identical to the <span class="mono">displayName</span>. It is occasionally shortened. For example, the <span class="mono">displayName</span> "Magic: The Gathering" has the <span class="mono">name</span> "Magic".
+            </div>
+            <div>
+              <div><span class="docKey">modifiedOn</span> <span class="docType z">string</span></div>
+              Timestamp when the category was last updated. Beware, the timezone is unclear and unknown. These timestamps seem to update quite frequently, implying they at least track when groups are added or removed.
+            </div>
+            <div>
+              <div><span class="docKey">displayName</span> <span class="docType z">string</span></div>
+              Name intended for display.
+            </div>
+            <div>
+              <div><span class="docKey">seoCategoryName</span> <span class="docType z">string</span></div>
+              Name intended for SEO purposes. Frequently, "&" signs are expanded into the word "and" and acronyms can be fully spelled out. For example, the <span class="mono">displayName</span> "Final Fantasy TCG" has the <span class="mono">seoCategoryName</span> "Final Fantasy Trading Card Game".
+            </div>
+            <div>
+              <div><span class="docKey">categoryDescription</span> <span class="docType z"><span class="r">nullable</span> string</span></div>
+              A bit of marketing copy describing this category.
+            </div>
+            <div>
+              <div><span class="docKey">categoryPageTitle</span> <span class="docType z"><span class="r">nullable</span> string</span></div>
+              TCGplayer's title and call to action for the category.
+            </div>
+            <div>
+              <div><span class="docKey">sealedLabel</span> <span class="docType z"><span class="r">nullable</span> string</span></div>
+              Enumerated string value: <span class="mono">"Sealed Product"</span>, <span class="mono">"Sealed Products"</span>, <span class="mono">"Bulk Lot"</span>, <span class="mono r">null</span>
+            </div>
+            <div>
+              <div><span class="docKey">nonSealedLabel</span> <span class="docType z"><span class="r">nullable</span> string</span></div>
+              A complete mess of an enumerated string value: <span class="mono">"Single Cards"</span>, <span class="mono">"Singles"</span>, <span class="mono">"Single Card"</span>, <span class="mono">"Event Kits"</span>, <span class="mono">"Single Card "</span>, <span class="mono">"Products"</span>, <span class="mono">"Non-Sealed Products"</span>, <span class="mono">"Figures"</span>, <span class="mono">"Cards"</span>, <span class="mono">"Miniatures"</span>, <span class="mono">"Unopened Games"</span>, <span class="mono">"Card & Die"</span>, <span class="mono r">null</span>
+            </div>
+            <div>
+              <div><span class="docKey">conditionGuideUrl</span> <span class="docType z">string</span></div>
+              A URL that links to a condition guide to help assess condition for products in this category.
+            </div>
+            <div>
+              <div><span class="docKey">isScannable</span> <span class="docType z">boolean</span></div>
+              Indicates whether products in this category can be scanned using the TCGplayer app's scanning feature.
+            </div>
+            <div>
+              <div><span class="docKey">popularity</span> <span class="docType z">int32</span></div>
+              An integer value representing the relative popularity or ranking.
+            </div>
+            <div>
+              <div><span class="docKey">isDirect</span> <span class="docType z">boolean</span></div>
+              Indicates whether products in this category can be purchased through TCGplayer Direct.
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+  <script>
+    function onHashChange(event) {
+      const hash = window.location.hash.substring(1);
+      const headings = document.getElementsByTagName('h3');
+      for(let i = 0; i < headings.length; i++) {
+        if (headings[i].id) {
+          if (headings[i].id == hash) {
+            headings[i].classList.add("highlight");
+          } else {
+            headings[i].classList.remove("highlight");
+          }
+        }
+      }
+    }
+
+    addEventListener("hashchange", onHashChange);
+
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const headings = document.getElementsByTagName('h3');
+
+    for(let i = 0; i < headings.length; i++) {
+      if (headings[i].id) {
+        headings[i].style.cursor = 'pointer';
+        headings[i].onclick = () => {
+          window.location.hash = headings[i].id;
+        }
+        headings[i].style.setProperty('--h3-hover-opacity', '0.85');
+        
+        const a = document.createElement('a');
+        a.innerHTML = headings[i].innerText;
+        a.href = '#' + headings[i].id;
+        sidebarNav.appendChild(a);
+      }
+    }
+
+    onHashChange(null);
+  </script>
+</html>

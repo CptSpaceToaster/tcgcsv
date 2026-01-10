@@ -19,10 +19,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Poppins:wght@600">
     <style>
       h3 { padding-block: 4px; margin-block-start: 62px; font-size: 1.4em; }
-      h3:hover {
-        opacity: 1;
-        opacity: var(--h3-hover-opacity);
-      }
+      h3:hover { opacity: 1; opacity: var(--h3-hover-opacity); }
       main { padding-block-end: 128px; }
     </style>
   </head>
@@ -38,11 +35,12 @@
       <nav class="internal-nav">
         <a href="/">Home</a>
         FAQs
+        <a href="/docs">Docs</a>
       </nav>
     </header>
     <main>
       <h2>Frequently Asked Questions</h2>
-      <p>See something wrong or out of place? Reach out on <a target="_blank" rel="noopener noreferrer nofollow" href="https://discord.gg/bydv2BNV25">discord</a> or submit an  <a target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/CptSpaceToaster/tcgcsv/issues">issue on Github</a> to ask a question or offer a correction!</p>
+      <p>See something wrong or out of place? Reach out on <a target="_blank" rel="noopener noreferrer nofollow" href="https://discord.gg/bydv2BNV25">discord</a> or submit an <a target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/CptSpaceToaster/tcgcsv/issues">issue on Github</a> to ask a question or offer a correction!</p>
 
       <h3 id="scraping">Can I scrape this website?</h3>
       <p>If the premade CSVs aren't quite what you need then go ahead! It might make more sense to process the cached JSON files with any requests library directly.</p>
@@ -143,13 +141,13 @@ all_categories = r.json()[<span class="s">&#39;results&#39;</span>]
   <script>
     function onHashChange(event) {
       const hash = window.location.hash.substring(1);
-      const questions = document.getElementsByTagName('h3');
-      for(let i = 0; i < questions.length; i++) {
-        if (questions[i].id) {
-          if (questions[i].id == hash) {
-            questions[i].classList.add("highlight");
+      const headings = document.getElementsByTagName('h3');
+      for(let i = 0; i < headings.length; i++) {
+        if (headings[i].id) {
+          if (headings[i].id == hash) {
+            headings[i].classList.add("highlight");
           } else {
-            questions[i].classList.remove("highlight");
+            headings[i].classList.remove("highlight");
           }
         }
       }
@@ -157,14 +155,14 @@ all_categories = r.json()[<span class="s">&#39;results&#39;</span>]
 
     addEventListener("hashchange", onHashChange);
 
-    const questions = document.getElementsByTagName('h3');
-    for(let i = 0; i < questions.length; i++) {
-      if (questions[i].id) {
-        questions[i].style.cursor = 'pointer';
-        questions[i].onclick = () => {
-          window.location.hash = questions[i].id;
+    const headings = document.getElementsByTagName('h3');
+    for(let i = 0; i < headings.length; i++) {
+      if (headings[i].id) {
+        headings[i].style.cursor = 'pointer';
+        headings[i].onclick = () => {
+          window.location.hash = headings[i].id;
         }
-        questions[i].style.setProperty('--h3-hover-opacity', '0.85');
+        headings[i].style.setProperty('--h3-hover-opacity', '0.85');
       }
     }
 

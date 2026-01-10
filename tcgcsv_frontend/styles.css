@@ -23,13 +23,15 @@ td:last-child { padding-inline-end: 4px; }
 tr:nth-child(even) td { background: #E4E4E4; }
 
 .mono { font-size: 0.9em; font-family: monospace, monospace; background-color: #EEE; padding: 2px 4px; border-radius: 4px; }
-code div { overflow: auto; max-width: 720px; border: solid gray; border-width: 2px 2px 2px 12px; padding: .2em .6em; line-height: 1.25em; }
+code div { overflow: auto; border: solid gray; border-width: 2px 2px 2px 12px; padding: .2em .6em; line-height: 1.25em; }
 
 p { color: #222; }
 a:visited, .s { color: #639; }
 .u { color: Black; }
 .c { color: DarkSeaGreen; font-style: italic; }
-.z { color: #AAA; }
+.z { color: #999; }
+.b { color: RoyalBlue; }
+.r { color: IndianRed; }
 .highlight { background-color: #ffde64; }
 
 @media (prefers-color-scheme: dark) {
@@ -44,12 +46,12 @@ a:visited, .s { color: #639; }
   tr:nth-child(even) td { background: #333; }
   th { background: #444; }
 
-  .mono { background-color: #444; }
+  .mono { background-color: #333; }
 
   p { color: #DDD; }
   a:visited, .s { color: #a7d; }
   .u { color: White; }
-  .z { color: #666; }
+  .z { color: #777; }
   .highlight { background-color: #916D18; }
 }
 
