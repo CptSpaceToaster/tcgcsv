@@ -183,6 +183,65 @@
               Indicates whether products in this category can be purchased through TCGplayer Direct.
             </div>
           </div>
+
+
+          <h3 id="TCGplayer-groups-collection">Groups Collection</h3>
+          <p>TCGplayer uses groups to represent collections of products within a category. Each group roughly translates to a set in a card game.</p>
+          <p>The cached response returns information from TCGplayer's <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/reference/catalog_getcategorygroups-1">Groups</a> endpoint.</p>
+          <p>URL Scheme: <span class="mono">https://tcgcsv.com/tcgplayer/{categoryId}/groups</span><br>Example URL: <a target="_blank" rel="noopener noreferrer nofollow" href="https://tcgcsv.com/tcgplayer/3/groups">https://tcgcsv.com/tcgplayer/3/groups</a></p>
+          <p>Example JSON response:</p>
+          <pre><code><div class="s"><span class="z">{</span>
+    "totalItems"<span class="z">: </span><span class="b">212</span><span class="z">,</span>
+    "success"<span class="z">: <span class="r">true</span><span class="z">,</span></span>
+    "errors"<span class="z">: []<span class="z">,</span></span>
+    "results"<span class="z">: [</span>
+        <span class="c">// ...</span>
+
+        <span class="z">{</span>
+            "groupId"<span class="z">: </span><span class="b">3170</span><span class="z">,</span>
+            "name"<span class="z">: </span>"SWSH12: Silver Tempest"<span class="z">,</span>
+            "abbreviation"<span class="z">: </span>"SWSH12"<span class="z">,</span>
+            "isSupplemental"<span class="z">: </span><span class="r">false</span><span class="z">,</span>
+            "publishedOn"<span class="z">: </span>"2022-11-11T00:00:00"<span class="z">,</span>
+            "modifiedOn"<span class="z">: </span>"2025-12-12T22:37:34.34"<span class="z">,</span>
+            "categoryId"<span class="z">: </span><span class="b">3</span>
+        <span class="z">},</span>
+
+        <span class="c">// ...</span>
+    <span class="z">]
+}</span>
+
+</div></pre></code>
+          <div class="docProps">
+            <div>
+              <div><span class="docKey">groupId</span> <span class="docType z">int32</span></div>
+              Unique incrementing integer ID. Safe to use as a primary key.
+            </div>
+            <div>
+              <div><span class="docKey">name</span> <span class="docType z">string</span></div>
+              Name of the group or set.
+            </div>
+            <div>
+              <div><span class="docKey">abbreviation</span> <span class="docType z">string</span></div>
+              Abbrieviation for the group or set. This abbreviation can be used for Mass Entry lookups.
+            </div>
+            <div>
+              <div><span class="docKey">isSupplemental</span> <span class="docType z">boolean</span></div>
+              A dubious boolean value indicating whether a group is considered a "supplemental" group rather than a main, booster-draft-legal expansion. TCGplayer seems to play fast and loose with what they consider "supplemental" however. Pokemon's <i>McDonald's Promos 2019</i> is considered <span class="mono">supplemental=<span class="r">False</span></span> however <i>McDonald's Promos 2018</i> is considered <span class="mono">supplemental=<span class="c">True</span></span>. Probably best ignored.
+            </div>
+            <div>
+              <div><span class="docKey">publishedOn</span> <span class="docType z">string</span></div>
+              Timestamp when the group was first created. Beware, the timezone is unclear and unknown.
+            </div>
+            <div>
+              <div><span class="docKey">modifiedOn</span> <span class="docType z">string</span></div>
+              Timestamp when the group was last updated. Beware, the timezone is unclear and unknown. These timestamps seem to update quite frequently, implying they at least track when products are added or removed.
+            </div>
+            <div>
+              <div><span class="docKey">categoryId</span> <span class="docType z">int32</span></div>
+              Reference to the category this group is related to.
+            </div>
+          </div>
         </div>
       </div>
     </main>
@@ -214,7 +273,7 @@
           window.location.hash = headings[i].id;
         }
         headings[i].style.setProperty('--h3-hover-opacity', '0.85');
-        
+
         const a = document.createElement('a');
         a.innerHTML = headings[i].innerText;
         a.href = '#' + headings[i].id;
