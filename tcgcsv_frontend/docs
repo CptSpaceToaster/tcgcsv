@@ -70,7 +70,7 @@
           <p>Almost all endpoints from their API yield responses with the following format:</p>
           <pre><code><div class="s"><span class="z">{</span>
     "totalItems"<span class="z">: </span><span class="b">440</span><span class="z">,</span>
-    "success"<span class="z">: <span class="r">true</span><span class="z">,</span></span>
+    "success"<span class="z">: <span class="c">true</span><span class="z">,</span></span>
     "errors"<span class="z">: []<span class="z">,</span></span>
     "results"<span class="z">: [</span>
         <span class="c">// ...</span>
@@ -103,7 +103,7 @@
           <p>Example JSON response:</p>
           <pre><code><div class="s"><span class="z">{</span>
     "totalItems"<span class="z">: </span><span class="b">89</span><span class="z">,</span>
-    "success"<span class="z">: <span class="r">true</span><span class="z">,</span></span>
+    "success"<span class="z">: <span class="c">true</span><span class="z">,</span></span>
     "errors"<span class="z">: []<span class="z">,</span></span>
     "results"<span class="z">: [</span>
         <span class="c">// ...</span>
@@ -119,9 +119,9 @@
             "sealedLabel"<span class="z">: </span>"Sealed Products"<span class="z">,</span>
             "nonSealedLabel"<span class="z">: </span>"Single Cards"<span class="z">,</span>
             "conditionGuideUrl"<span class="z">: </span>"https://store.tcgplayer.com/help/cardconditionguide"<span class="z">,</span>
-            "isScannable"<span class="z">: </span><span class="r">true</span><span class="z">,</span>
+            "isScannable"<span class="z">: </span><span class="c">true</span><span class="z">,</span>
             "popularity"<span class="z">: </span><span class="b">576635</span><span class="z">,</span>
-            "isDirect"<span class="z">: </span><span class="r">true</span>
+            "isDirect"<span class="z">: </span><span class="c">true</span>
         <span class="z">},</span>
 
         <span class="c">// ...</span>
@@ -184,7 +184,6 @@
             </div>
           </div>
 
-
           <h3 id="TCGplayer-groups-collection">Groups Collection</h3>
           <p>TCGplayer uses groups to represent collections of products within a category. Each group roughly translates to a set in a card game.</p>
           <p>The cached response returns information from TCGplayer's <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/reference/catalog_getcategorygroups-1">Groups</a> endpoint.</p>
@@ -192,7 +191,7 @@
           <p>Example JSON response:</p>
           <pre><code><div class="s"><span class="z">{</span>
     "totalItems"<span class="z">: </span><span class="b">212</span><span class="z">,</span>
-    "success"<span class="z">: <span class="r">true</span><span class="z">,</span></span>
+    "success"<span class="z">: <span class="c">true</span><span class="z">,</span></span>
     "errors"<span class="z">: []<span class="z">,</span></span>
     "results"<span class="z">: [</span>
         <span class="c">// ...</span>
@@ -201,7 +200,7 @@
             "groupId"<span class="z">: </span><span class="b">3170</span><span class="z">,</span>
             "name"<span class="z">: </span>"SWSH12: Silver Tempest"<span class="z">,</span>
             "abbreviation"<span class="z">: </span>"SWSH12"<span class="z">,</span>
-            "isSupplemental"<span class="z">: </span><span class="r">false</span><span class="z">,</span>
+            "isSupplemental"<span class="z">: </span><span class="o">false</span><span class="z">,</span>
             "publishedOn"<span class="z">: </span>"2022-11-11T00:00:00"<span class="z">,</span>
             "modifiedOn"<span class="z">: </span>"2025-12-12T22:37:34.34"<span class="z">,</span>
             "categoryId"<span class="z">: </span><span class="b">3</span>
@@ -227,7 +226,7 @@
             </div>
             <div>
               <div><span class="docKey">isSupplemental</span> <span class="docType z">boolean</span></div>
-              A dubious boolean value indicating whether a group is considered a "supplemental" group rather than a main, booster-draft-legal expansion. TCGplayer seems to play fast and loose with what they consider "supplemental" however. Pokemon's <i>McDonald's Promos 2019</i> is considered <span class="mono">supplemental=<span class="r">False</span></span> however <i>McDonald's Promos 2018</i> is considered <span class="mono">supplemental=<span class="c">True</span></span>. Probably best ignored.
+              A dubious boolean value indicating whether a group is considered a "supplemental" group rather than a main expansion. TCGplayer seems to play fast and loose with what they consider "supplemental" however. Pokemon's <i>McDonald's Promos 2019</i> is considered <span class="mono">supplemental=<span class="o">false</span></span> however <i>McDonald's Promos 2018</i> is considered <span class="mono">supplemental=<span class="c">True</span></span>. Probably best ignored.
             </div>
             <div>
               <div><span class="docKey">publishedOn</span> <span class="docType z">string</span></div>
@@ -240,6 +239,158 @@
             <div>
               <div><span class="docKey">categoryId</span> <span class="docType z">int32</span></div>
               Reference to the category this group is related to.
+            </div>
+          </div>
+
+          <h3 id="TCGplayer-products-collection">Products Collection</h3>
+          <p>TCGplayer uses products to represent sealed boxes, packs, code cards, individual trading cards, and more! Products have nested <span class="mono">extendedData</span> which is where TCGplayer usually stores a card's text, rarity, and set number. Products have separate Market Price objects available in a parallel collection that need to be joined via their <span class="mono">productId</span>.</p>
+          <p>The cached response returns information from TCGplayer's <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/reference/catalog_getproducts-1">Products</a> endpoint with the query parameter <span class="mono">getExtendedFields</span> set to <span class="mono c">true</span>.</p>
+          <p>URL Scheme: <span class="mono">https://tcgcsv.com/tcgplayer/{categoryId}/{groupId}/products</span><br>Example URL: <a target="_blank" rel="noopener noreferrer nofollow" href="https://tcgcsv.com/tcgplayer/3/3170/products">https://tcgcsv.com/tcgplayer/3/3170/products</a></p>
+          <p>Example JSON response:</p>
+          <pre><code><div class="s"><span class="z">{</span>
+    "totalItems"<span class="z">: </span><span class="b">254</span><span class="z">,</span>
+    "success"<span class="z">: <span class="c">true</span><span class="z">,</span></span>
+    "errors"<span class="z">: []<span class="z">,</span></span>
+    "results"<span class="z">: [</span>
+        <span class="c">// ...</span>
+
+        <span class="z">{</span>
+            "productId"<span class="z">: </span><span class="b">451396</span><span class="z">,</span>
+            "name"<span class="z">: </span>"Lugia VSTAR"<span class="z">,</span>
+            "cleanName"<span class="z">: </span>"Lugia VSTAR"<span class="z">,</span>
+            "imageUrl"<span class="z">: </span>"https://tcgplayer-cdn.tcgplayer.com/product/451396_200w.jpg"<span class="z">,</span>
+            "categoryId"<span class="z">: </span><span class="b">3</span><span class="z">,</span>
+            "groupId"<span class="z">: </span><span class="b">3170</span><span class="z">,</span>
+            "url"<span class="z">: </span>"https://www.tcgplayer.com/product/451396/pokemon-swsh12-silver-tempest-lugia-vstar"<span class="z">,</span>
+            "modifiedOn"<span class="z">: </span>"2025-12-04T15:00:29.8"<span class="z">,</span>
+            "imageCount"<span class="z">: </span><span class="b">1</span><span class="z">,</span>
+            "presaleInfo"<span class="z">: {</span>
+                "isPresale"<span class="z">: </span><span class="o">false</span><span class="z">,</span>
+                "releasedOn"<span class="z">: </span><span class="r">null</span><span class="z">,</span>
+                "note"<span class="z">: <span class="r">null</span></span>
+            <span class="z">},</span>
+            "extendedData"<span class="z">: [
+                {</span>
+                  "name"<span class="z">: </span>"Number"<span class="z">,</span>
+                  "displayName"<span class="z">: </span>"Card Number"<span class="z">,</span>
+                  "value"<span class="z">: </span>"139/195"
+                <span class="z">}, {</span>
+                  "name"<span class="z">: </span>"Rarity"<span class="z">,</span>
+                  "displayName"<span class="z">: </span>"Rarity"<span class="z">,</span>
+                  "value"<span class="z">: </span>"Ultra Rare"
+                <span class="z">}, {</span>
+                  "name"<span class="z">: </span>"Card Type"<span class="z">,</span>
+                  "displayName"<span class="z">: </span>"Card Type"<span class="z">,</span>
+                  "value"<span class="z">: </span>"Colorless"
+                <span class="z">}, {</span>
+                  "name"<span class="z">: </span>"HP"<span class="z">,</span>
+                  "displayName"<span class="z">: </span>"HP"<span class="z">,</span>
+                  "value"<span class="z">: </span>"280"
+                <span class="z">}, {</span>
+                  "name"<span class="z">: </span>"Stage"<span class="z">,</span>
+                  "displayName"<span class="z">: </span>"Stage"<span class="z">, </span>
+                  "value"<span class="z">: </span>"VSTAR"
+                <span class="z">}, { </span>
+                  "name"<span class="z">: </span>"CardText"<span class="z">,</span>
+                  "displayName"<span class="z">: </span>"Card Text"<span class="z">,</span>
+                  "value"<span class="z">: </span>`&lt;span style="color:gold"&gt;&lt;strong&gt;<span class="y">VSTAR Power</span>&lt;/strong&gt;&lt;/span&gt;\r\n&lt;br&gt;\r\n&lt;strong&gt;Ability — Summoning Star&lt;/strong&gt;\r\n&lt;br&gt;\r\…game.)&lt;/em&gt;\r\n&lt;br&gt;&lt;br&gt;\r\n&lt;em&gt;VSTAR rule — When your Pokémon VSTAR is Knocked Out, your opponent takes 2 Prize cards.&lt;/em&gt;`
+                <span class="z">}, {</span>
+                  "name"<span class="z">: </span>"Attack 1"<span class="z">,</span>
+                  "displayName"<span class="z">: </span>"Attack 1"<span class="z">, </span>
+                  "value"<span class="z">: </span>"[4] Tempest Dive (220)\r\n&lt;br&gt;\r\nYou may discard a Stadium in play."
+                <span class="z">}, {</span>
+                  "name"<span class="z">: </span>"Weakness"<span class="z">,</span>
+                  "displayName"<span class="z">: </span>"Weakness"<span class="z">,</span>
+                  "value"<span class="z">: </span>"Lx2"
+                <span class="z">}, {</span>
+                  "name"<span class="z">: </span>"Resistance"<span class="z">,</span>
+                  "displayName"<span class="z">: </span>"Resistance"<span class="z">,</span>
+                  "value"<span class="z">: </span>"F-30"
+                <span class="z">}, {</span>
+                  "name"<span class="z">: </span>"RetreatCost"<span class="z">,</span>
+                  "displayName"<span class="z">: </span>"Retreat Cost"<span class="z">,</span>
+                  "value"<span class="z">: </span>"2"<span class="z">
+                <span class="z">}
+            ]
+        },</span>
+
+        <span class="c">// ...</span>
+    <span class="z">]
+}</span>
+
+</div></pre></code>
+          <span class="mono c">// Under Construction</span>
+          <div class="docProps">
+            <div>
+              <div><span class="docKey">productId</span> <span class="docType z">int32</span></div>
+              Unique incrementing integer ID. Safe to use as a primary key.
+            </div>
+            <div>
+              <div><span class="docKey">name</span> <span class="docType z">string</span></div>
+              Name of the product or card.
+            </div>
+            <div>
+              <div><span class="docKey">cleanName</span> <span class="docType z">string</span></div>
+
+            </div>
+            <div>
+              <div><span class="docKey">imageUrl</span> <span class="docType z">string</span></div>
+
+            </div>
+            <div>
+              <div><span class="docKey">categoryId</span> <span class="docType z">int32</span></div>
+              Reference to the category this product is related to.
+            </div>
+            <div>
+              <div><span class="docKey">groupId</span> <span class="docType z">int32</span></div>
+              Reference to the group this product is related to.
+            </div>
+            <div>
+              <div><span class="docKey">url</span> <span class="docType z">string</span></div>
+
+            </div>
+            <div>
+              <div><span class="docKey">modifiedOn</span> <span class="docType z">string</span></div>
+              Timestamp when the group was last updated. Beware, the timezone is unclear and unknown. I am not sure what these timestamps track.
+            </div>
+            <div>
+              <div><span class="docKey">imageCount</span> <span class="docType z">int32</span></div>
+
+            </div>
+            <div>
+              <div><span class="docKey">presaleInfo</span> <span class="docType z">object</span></div>
+
+            </div>
+            <div>
+              <div>├─── <span class="docKey">isPresale</span> <span class="docType z">bool</span></div>
+
+            </div>
+            <div>
+              <div>├─── <span class="docKey">releasedOn</span> <span class="docType z"><span class="r">nullable</span> string</span></div>
+
+            </div>
+            <div>
+              <div>└─── <span class="docKey">note</span> <span class="docType z"><span class="r">nullable</span> string</span></div>
+
+            </div>
+            <div>
+              <div><span class="docKey">extendedData</span> <span class="docType z">list</span></div>
+
+            </div>
+          </div>
+          <p>Property Definitions for Extended Data:</p>
+          <div class="docProps">
+            <div>
+              <div><span class="docKey">name</span> <span class="docType z">string</span></div>
+
+            </div>
+            <div>
+              <div><span class="docKey">displayName</span> <span class="docType z">string</span></div>
+
+            </div>
+            <div>
+              <div><span class="docKey">value</span> <span class="docType z">string</span></div>
+
             </div>
           </div>
         </div>

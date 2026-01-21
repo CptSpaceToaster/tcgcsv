@@ -32,6 +32,8 @@ a:visited, .s { color: #639; }
 .z { color: #999; }
 .b { color: RoyalBlue; }
 .r { color: IndianRed; }
+.y { color: DarkGoldenrod }
+.o { color: DarkOrange }
 .highlight { background-color: #ffde64; }
 
 @media (prefers-color-scheme: dark) {
@@ -52,6 +54,8 @@ a:visited, .s { color: #639; }
   a:visited, .s { color: #a7d; }
   .u { color: White; }
   .z { color: #777; }
+  .y { color: gold }
+  .o { color: Orange }
   .highlight { background-color: #916D18; }
 }
 
