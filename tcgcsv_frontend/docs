@@ -319,7 +319,6 @@
 }</span>
 
 </div></pre></code>
-          <span class="mono c">// Under Construction</span>
           <div class="docProps">
             <div>
               <div><span class="docKey">productId</span> <span class="docType z">int32</span></div>
@@ -330,12 +329,12 @@
               Name of the product or card.
             </div>
             <div>
-              <div><span class="docKey">cleanName</span> <span class="docType z">string</span></div>
-
+              <div><span class="docKey">cleanName</span> <span class="docType z"><span class="r">nullable</span> string</span></div>
+              Name of the product or card, with some special characters removed <span class="mono">()[]&-'!?/:.</span> etc.
             </div>
             <div>
               <div><span class="docKey">imageUrl</span> <span class="docType z">string</span></div>
-
+              Image URL to TCGplayer's image CDN. For a slightly higher quality image, replace the <span class="mono">_200w</span>, at the end of the URL with <span class="mono">_in_1000x1000</span>, however the image may still end up being pretty small.
             </div>
             <div>
               <div><span class="docKey">categoryId</span> <span class="docType z">int32</span></div>
@@ -347,7 +346,7 @@
             </div>
             <div>
               <div><span class="docKey">url</span> <span class="docType z">string</span></div>
-
+              URL linking to the product's page on TCGplayer
             </div>
             <div>
               <div><span class="docKey">modifiedOn</span> <span class="docType z">string</span></div>
@@ -355,42 +354,42 @@
             </div>
             <div>
               <div><span class="docKey">imageCount</span> <span class="docType z">int32</span></div>
-
+              Number of available product images. Usually between 0 and 6.
             </div>
             <div>
               <div><span class="docKey">presaleInfo</span> <span class="docType z">object</span></div>
-
+              Sub-object containing some presale information.
             </div>
             <div>
               <div>├─── <span class="docKey">isPresale</span> <span class="docType z">bool</span></div>
-
+              Indicates whether products is considered.
             </div>
             <div>
               <div>├─── <span class="docKey">releasedOn</span> <span class="docType z"><span class="r">nullable</span> string</span></div>
-
+              No idea. My best guess is that this is a timestamp indicating when the presale note was written/last updated. Beware, the timezone is unclear and unknown.
             </div>
             <div>
               <div>└─── <span class="docKey">note</span> <span class="docType z"><span class="r">nullable</span> string</span></div>
-
+              If present, a note detailing expected shipping dates.
             </div>
             <div>
               <div><span class="docKey">extendedData</span> <span class="docType z">list</span></div>
-
+              An array of JSON sub-objects containing additional category-specific information about each product. You can think of this list as a key-value store. Most of the relevent card information will be stored here. If you would like to know if the product is a "Card", checking the extendedData for a property names <span class="mono">Rarity</span> or <span class="mono">Number</span> is a good indicator.
             </div>
           </div>
           <p>Property Definitions for Extended Data:</p>
           <div class="docProps">
             <div>
               <div><span class="docKey">name</span> <span class="docType z">string</span></div>
-
+              Name of the extended data property. You can think of this as the property's key.
             </div>
             <div>
               <div><span class="docKey">displayName</span> <span class="docType z">string</span></div>
-
+              Name intended for display. Frequently, this is identical to the <span class="mono">name</span> with spaces added for readability.
             </div>
             <div>
               <div><span class="docKey">value</span> <span class="docType z">string</span></div>
-
+              Value of the extended data property.
             </div>
           </div>
         </div>
