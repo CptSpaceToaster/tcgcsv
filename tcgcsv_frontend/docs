@@ -350,7 +350,7 @@
             </div>
             <div>
               <div><span class="docKey">modifiedOn</span> <span class="docType z">string</span></div>
-              Timestamp when the group was last updated. Beware, the timezone is unclear and unknown. I am not sure what these timestamps track.
+              Timestamp when the product was last updated. Beware, the timezone is unclear and unknown. I am not sure what these timestamps track.
             </div>
             <div>
               <div><span class="docKey">imageCount</span> <span class="docType z">int32</span></div>
@@ -362,7 +362,7 @@
             </div>
             <div>
               <div>├─── <span class="docKey">isPresale</span> <span class="docType z">bool</span></div>
-              Indicates whether products is considered.
+              Indicates whether the product is available for immediate delivery. Purchases of <span class="mono">isPresale=<span class="c">true</span></span> products will be shipped at a later time.
             </div>
             <div>
               <div>├─── <span class="docKey">releasedOn</span> <span class="docType z"><span class="r">nullable</span> string</span></div>
