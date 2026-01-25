@@ -67,7 +67,7 @@
           <p>See something wrong or out of place? Reach out on <a target="_blank" rel="noopener noreferrer nofollow" href="https://discord.gg/bydv2BNV25">discord</a> or submit an <a target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/CptSpaceToaster/tcgcsv/issues">issue on Github</a> to ask a question or offer a correction!</p>
           <h3 id="TCGplayer">TCGplayer</h3>
           <p>The bulk of the information offered here from TCGplayer is a direct export from their API endpoints. When relevent, this documentation will link to the TCGplayer API endpoints that yielded the cached response.</p>
-          <p>Almost all endpoints from their API yield responses with the following format:</p>
+          <p><i>Almost</i> all endpoints from their API yield responses with the following format:</p>
           <pre><code><div class="s"><span class="z">{</span>
     "totalItems"<span class="z">: </span><span class="b">440</span><span class="z">,</span>
     "success"<span class="z">: <span class="c">true</span><span class="z">,</span></span>
@@ -78,6 +78,7 @@
 }</span>
 
 </div></code></pre>
+          <p>The Market Price Collection does not include <span class="mono">totalItems</span> for some mysterious reason.</p>
           <div class="docProps">
             <div>
               <div><span class="docKey">totalItems</span> <span class="docType z">int32</span></div>
@@ -98,7 +99,7 @@
           </div>
           <h3 id="TCGplayer-categories-collection">Categories Collection</h3>
           <p>TCGplayer uses categories to roughly translate to a card game or a collection of merchandise.</p>
-          <p>The cached response returns information from TCGplayer's <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/reference/catalog_getcategories-1">Categories</a> endpoint.</p>
+          <p>The cached response returns information from TCGplayer's <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/reference/catalog_getcategories-1">List All Categories</a> endpoint.</p>
           <p>Example URL: <a target="_blank" rel="noopener noreferrer nofollow" href="https://tcgcsv.com/tcgplayer/categories">https://tcgcsv.com/tcgplayer/categories</a> </p>
           <p>Example JSON response:</p>
           <pre><code><div class="s"><span class="z">{</span>
@@ -186,7 +187,7 @@
 
           <h3 id="TCGplayer-groups-collection">Groups Collection</h3>
           <p>TCGplayer uses groups to represent collections of products within a category. Each group roughly translates to a set in a card game.</p>
-          <p>The cached response returns information from TCGplayer's <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/reference/catalog_getcategorygroups-1">Groups</a> endpoint.</p>
+          <p>The cached response returns information from TCGplayer's <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/reference/catalog_getcategorygroups-1">List All Category Groups</a> endpoint.</p>
           <p>URL Scheme: <span class="mono">https://tcgcsv.com/tcgplayer/{categoryId}/groups</span><br>Example URL: <a target="_blank" rel="noopener noreferrer nofollow" href="https://tcgcsv.com/tcgplayer/3/groups">https://tcgcsv.com/tcgplayer/3/groups</a></p>
           <p>Example JSON response:</p>
           <pre><code><div class="s"><span class="z">{</span>
@@ -244,7 +245,7 @@
 
           <h3 id="TCGplayer-products-collection">Products Collection</h3>
           <p>TCGplayer uses products to represent sealed boxes, packs, code cards, individual trading cards, and more! Products have nested <span class="mono">extendedData</span> which is where TCGplayer usually stores a card's text, rarity, and set number. Products have separate Market Price objects available in a parallel collection that need to be joined via their <span class="mono">productId</span>.</p>
-          <p>The cached response returns information from TCGplayer's <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/reference/catalog_getproducts-1">Products</a> endpoint with the query parameter <span class="mono">getExtendedFields</span> set to <span class="mono c">true</span>.</p>
+          <p>The cached response returns information from TCGplayer's <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/reference/catalog_getproducts-1">List All Products</a> endpoint with the query parameter <span class="mono">getExtendedFields</span> set to <span class="mono c">true</span>.</p>
           <p>URL Scheme: <span class="mono">https://tcgcsv.com/tcgplayer/{categoryId}/{groupId}/products</span><br>Example URL: <a target="_blank" rel="noopener noreferrer nofollow" href="https://tcgcsv.com/tcgplayer/3/3170/products">https://tcgcsv.com/tcgplayer/3/3170/products</a></p>
           <p>Example JSON response:</p>
           <pre><code><div class="s"><span class="z">{</span>
@@ -358,7 +359,6 @@
             </div>
             <div>
               <div><span class="docKey">presaleInfo</span> <span class="docType z">object</span></div>
-              Sub-object containing some presale information.
             </div>
             <div>
               <div>├─── <span class="docKey">isPresale</span> <span class="docType z">bool</span></div>
@@ -390,6 +390,74 @@
             <div>
               <div><span class="docKey">value</span> <span class="docType z">string</span></div>
               Value of the extended data property.
+            </div>
+          </div>
+          <p>I currently do not have any meta endpoints that publicise or vendor the extendedData items one can expect from a category or group. Users will need to sample products and inspect the extendedData they find there to see if it's present and useful.</p>
+
+          <h3 id="TCGplayer-market-price-collection">Market Prices Collection</h3>
+          <p>Products have Market Price objects available that need to be joined via their <span class="mono">productId</span>. <b>Note:</b> Products are one-to-many with Prices. One product can have <i>multiple</i> price objects.</p>
+          <p>The cached response returns information from TCGplayer's <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.tcgplayer.com/reference/pricing_getgroupprices">Product Prices by Group</a> endpoint.</p>
+          <p>URL Scheme: <span class="mono">https://tcgcsv.com/tcgplayer/{categoryId}/{groupId}/prices</span><br>Example URL: <a target="_blank" rel="noopener noreferrer nofollow" href="https://tcgcsv.com/tcgplayer/3/3170/prices">https://tcgcsv.com/tcgplayer/3/3170/prices</a></p>
+          <p>Example JSON response:</p>
+          <pre><code><div class="s"><span class="z">{</span>
+    "success"<span class="z">: <span class="c">true</span><span class="z">,</span></span>
+    "errors"<span class="z">: []<span class="z">,</span></span>
+    "results"<span class="z">: [</span>
+        <span class="c">// ...</span>
+
+        <span class="z">{</span>
+            "productId"<span class="z">: </span><span class="b">451784</span><span class="z">,</span>
+            "lowPrice"<span class="z">: </span><span class="b">0.1</span><span class="z">,</span>
+            "midPrice"<span class="z">: </span><span class="b">0.51</span><span class="z">,</span>
+            "highPrice"<span class="z">: </span><span class="b">25.51</span><span class="z">,</span>
+            "marketPrice"<span class="z">: </span><span class="b">0.53</span><span class="z">,</span>
+            "directLowPrice"<span class="z">: </span><span class="b">0.44</span><span class="z">,</span>
+            "subTypeName"<span class="z">: </span>"Holofoil"
+        <span class="z">}, {</span>
+            "productId"<span class="z">: </span><span class="b">451784</span><span class="z">,</span>
+            "lowPrice"<span class="z">: </span><span class="b">0.35</span><span class="z">,</span>
+            "midPrice"<span class="z">: </span><span class="b">0.7</span><span class="z">,</span>
+            "highPrice"<span class="z">: </span><span class="b">2.99</span><span class="z">,</span>
+            "marketPrice"<span class="z">: </span><span class="b">0.74</span><span class="z">,</span>
+            "directLowPrice"<span class="z">: </span><span class="r">null</span><span class="z">,</span>
+            "subTypeName"<span class="z">: </span>"Reverse Holofoil"
+        <span class="z">}</span>
+
+        <span class="c">// ...</span>
+    <span class="z">]
+}</span>
+
+</div></pre></code>
+          <p>Note the lack of a <span class="mono r">totalItems</span> property.</p>
+
+          <div class="docProps">
+            <div>
+              <div><span class="docKey">productId</span> <span class="docType z">int32</span></div>
+              Incrementing integer ID. <span class="r">Not safe to use as a primary key.</span> Must be combined into a composite key with <span class="mono">subTypeName</span>
+            </div>
+            <div>
+              <div><span class="docKey">lowPrice</span> <span class="docType z">double</span></div>
+              The lowest listed price of a card sans condition. Does not include shipping.
+            </div>
+            <div>
+              <div><span class="docKey">midPrice</span> <span class="docType z">double</span></div>
+              Median listing price. The discrepancy between <span class="mono">midPrice</span> and <span class="mono">marketPrice</span> is usually what people look at.
+            </div>
+            <div>
+              <div><span class="docKey">highPrice</span> <span class="docType z">double</span></div>
+              The highest price of a card. Generally not a very helpful property due to <a href="/faq#price-parking">price parking</a>.
+            </div>
+            <div>
+              <div><span class="docKey">marketPrice</span> <span class="docType z"><span class="r">nullable</span> double</span></span></div>
+              Represents the vague "selling price of the card". In <a target="_blank" rel="noopener noreferrer nofollow" href="https://help.tcgplayer.com/hc/en-us/articles/213588017-TCGplayer-Market-Price">TCGplayer's words</a>: "TCGplayer Market Price uses the value at which a card has recently been selling as a key data point in the calculation of that card's worth." The <span class="mono">marketPrice</span> for a newer cards will roughly center around <i>Near Mint</i> (NM) or <i>Lightly Played</i> (LP) listings, <b>but not always.</b> Older cards will tend to settle on whatever's available and whatever's moving including <i>Heavily Played</i> (HP) sales. Extremely low sales volume will result in the market price yielding <span class="mono r">null</span> or behaving slowly.
+            </div>
+            <div>
+              <div><span class="docKey">directLowPrice</span> <span class="docType z"><span class="r">nullable</span> double</span></span></div>
+              The "low price" if you are ordering cards from the <a target="_blank" rel="noopener noreferrer nofollow" href="https://help.tcgplayer.com/hc/en-us/articles/201996857-Buying-from-TCGplayer-Direct">TCGplayer's direct program</a>. Buyers will recieve one package when they order cards directly from TCGplayer, but that usually means there's a premium included in the card price.
+            </div>
+            <div>
+              <div><span class="docKey">subTypeName</span> <span class="docType z">string</span></div>
+              A name given to the printing or variation of the product. Needed when a product may have multiple prices. Examples include: <span class="mono">Normal</span>, <span class="mono">Holofoil</span>, and <span class="mono">Reverse Holofoil</span>.
             </div>
           </div>
         </div>
