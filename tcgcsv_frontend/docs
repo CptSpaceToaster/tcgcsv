@@ -428,8 +428,7 @@
 }</span>
 
 </div></pre></code>
-          <p>Note the lack of a <span class="mono r">totalItems</span> property.</p>
-
+          <p>Note the lack of a <span class="mono r">totalItems</span> property. Prices are in <i>United States Dollars (USD)</i></p>
           <div class="docProps">
             <div>
               <div><span class="docKey">productId</span> <span class="docType z">int32</span></div>
