@@ -26,6 +26,7 @@ tr:nth-child(even) td { background: #E4E4E4; }
 code div { overflow: auto; border: solid gray; border-width: 2px 2px 2px 12px; padding: .2em .6em; line-height: 1.25em; }
 
 p { color: #222; }
+li { color: #111; }
 a:visited, .s { color: #639; }
 .u { color: Black; }
 .c { color: DarkSeaGreen; font-style: italic; }
@@ -51,6 +52,7 @@ a:visited, .s { color: #639; }
   .mono { background-color: #333; }
 
   p { color: #DDD; }
+  li { color: #EEE; }
   a:visited, .s { color: #a7d; }
   .u { color: White; }
   .z { color: #777; }

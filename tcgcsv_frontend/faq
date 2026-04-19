@@ -45,35 +45,43 @@
       <h3 id="scraping">Can I scrape this website?</h3>
       <p>If the premade CSVs aren't quite what you need then go ahead! It might make more sense to process the cached JSON files with any requests library directly.</p>
       <pre><code><div><b>import</b> requests
+<b>import</b> time
+
+<span class="c"># Create a session with a clearly identifiable User-Agent</span>
+session = requests.Session()
+<b></b>session.headers.update</b>({
+    <span class="s">'User-Agent'</span>: <span class="s">'YourApplication/X.Y.Z'</span>
+})
 
 pokemon_category = <span class="s">&#39;3&#39;</span>
 
-r = requests.get(f<span class="s">&quot;https://tcgcsv.com/tcgplayer/<span class="u">{pokemon_category}</span>/groups&quot;</span>)
+r = session.get(f<span class="s">&quot;https://tcgcsv.com/tcgplayer/<span class="u">{pokemon_category}</span>/groups&quot;</span>)
 all_groups = r.json()[<span class="s">&#39;results&#39;</span>]
 
 <b>for</b> group <b>in</b> all_groups:
     group_id = group[<span class="s">&#39;groupId&#39;</span>]
-    r = requests.get(f<span class="s">&quot;https://tcgcsv.com/tcgplayer/<span class="u">{pokemon_category}</span>/<span class="u">{group_id}</span>/products&quot;</span>)
+    r = session.get(f<span class="s">&quot;https://tcgcsv.com/tcgplayer/<span class="u">{pokemon_category}</span>/<span class="u">{group_id}</span>/products&quot;</span>)
     products = r.json()[<span class="s">&#39;results&#39;</span>]
 
     <b>for</b> product <b>in</b> products:
         <span class="c"># Process product information</span>
         <b>print</b>(f<span class="s">&quot;<span class="u">{product[</span>&#39;productId&#39;<span class="u">]}</span> - <span class="u">{product[</span>&#39;name&#39;<span class="u">]}</span>&quot;</span>)
 
-    r = requests.get(f<span class="s">&quot;https://tcgcsv.com/tcgplayer/<span class="u">{pokemon_category}</span>/<span class="u">{group_id}</span>/prices&quot;</span>)
+    r = session.get(f<span class="s">&quot;https://tcgcsv.com/tcgplayer/<span class="u">{pokemon_category}</span>/<span class="u">{group_id}</span>/prices&quot;</span>)
     prices = r.json()[<span class="s">&#39;results&#39;</span>]
 
     <b>for</b> price <b>in</b> prices:
         <span class="c"># Process prices</span>
         <b>print</b>(f<span class="s">&quot;<span class="u">{price[</span>&#39;productId&#39;<span class="u">]}</span> - <span class="u">{price[</span>&#39;subTypeName&#39;<span class="u">]}</span> - <span class="u">{price[</span>&#39;midPrice&#39;<span class="u">]}</span>&quot;</span>)
 
+    time.sleep(<span class="b">0.25</span>)
     <b>break</b> <span class="c"># Only process the first group and break for testing</span>
     </div></code></pre>
 
       <h3 id="price-archive">Are there any past prices available?</h3>
-      <p>TCGplayer does not offer historcal price information, but TCGCSV does maintain a price archive that records prices daily. You can download price history from February 8, 2024 and onwards! (You will need <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.7-zip.org/download.html">7zip</a> to extract the archive)
+      <p>TCGplayer does not offer historcal price information, but TCGCSV does maintain a price archive that records prices into compressed archive files daily. You can download price history from February 8, 2024 and onwards! (You will need <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.7-zip.org/download.html">7zip</a> to extract the archive)
       <p>For the technical folks out there:</p>
-      <pre><code><div><span class="c"># Download archive</span>
+      <pre><code><div><span class="c"># Download archive for a single date</span>
 curl -O https://tcgcsv.com/archive/tcgplayer/prices-2024-02-08.ppmd.7z
 
 <span class="c"># Extract</span>
@@ -84,8 +92,10 @@ cat 2024-02-08/3/3170/prices</div></code></pre>
       <p>For everyone else:
         <ol>
           <li>Install <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.7-zip.org/download.html">7zip</a></li>
-          <li>Download the archives you'd like to extract:
+          <li>Download the archive for each date you want to extract:
           <br><a href="https://tcgcsv.com/archive/tcgplayer/prices-2024-02-08.ppmd.7z">https://tcgcsv.com/archive/tcgplayer/prices-2024-02-08.ppmd.7z</a></li>
+          <br><a href="https://tcgcsv.com/archive/tcgplayer/prices-2024-02-09.ppmd.7z">https://tcgcsv.com/archive/tcgplayer/prices-2024-02-09.ppmd.7z</a></li>
+          <br>etc...
           <li>Anything before 2024-02-08 doesn't exist at the time of writing :(</li>
           <li>Use 7zip to extract the file you downloaded!</li>
         </ol>
@@ -104,8 +114,15 @@ cat 2024-02-08/3/3170/prices</div></code></pre>
       <p>Categories 69 and 70 indicate that TCGplayer attempted to categorize comic books at one point... and then stopped. Unlike category 21, these two categories have 1000's of groups available, however every group is empty (no products). These empty product-lists are <b>not</b> available to save on processing time.</p>
       <p>For these reasons, I would strongly suggest skipping categories 21, 69, and 70 when processing all categories.</p>
       <pre><code><div><b>import</b> requests
+<b>import</b> time
 
-r = requests.get(<span class="s">&#39;https://tcgcsv.com/tcgplayer/categories&#39;</span>)
+<span class="c"># Create a session with a clearly identifiable User-Agent</span>
+session = requests.Session()
+<b></b>session.headers.update</b>({
+    <span class="s">'User-Agent'</span>: <span class="s">'YourApplication/X.Y.Z'</span>
+})
+
+r = session.get(<span class="s">&#39;https://tcgcsv.com/tcgplayer/categories&#39;</span>)
 all_categories = r.json()[<span class="s">&#39;results&#39;</span>]
 
 <b>for</b> category <b>in</b> all_categories:
@@ -113,7 +130,9 @@ all_categories = r.json()[<span class="s">&#39;results&#39;</span>]
     <b>if</b> category_id <b>in</b> [<span class="s">21</span>, <span class="s">69</span>, <span class="s">70</span>]:
         <b>continue</b>
 
-    <span class="c"># Process the other categories normally</span></div></code></pre>
+    <span class="c"># Process the other categories normally</span>
+    time.sleep(<span class="b">0.25</span>)</div></code></pre>
+
 
       <h3 id="price-parking">Why are some of the listed high prices absurd, unusually large, and "just bananas"?</h3>
       <p>A lot of sellers on TCGplayer engage in <b>Price Parking</b>: when a seller sets the price of a product to <i>thousands</i> of dollars so noone buys it. I don't know why sellers do this, but my guess is that a seller would want to park a card so they don't have to pick the card's set, printing, and condition if they want to list the card for sale again.</p>

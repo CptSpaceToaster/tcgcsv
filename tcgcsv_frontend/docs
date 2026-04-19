@@ -65,6 +65,24 @@
         <div id="documentation">
           <h2>Documentation</h2>
           <p>See something wrong or out of place? Reach out on <a target="_blank" rel="noopener noreferrer nofollow" href="https://discord.gg/bydv2BNV25">discord</a> or submit an <a target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/CptSpaceToaster/tcgcsv/issues">issue on Github</a> to ask a question or offer a correction!</p>
+
+          <h3 id="Usage-guidelines">Usage Guidelines</h3>
+          <p>TCGCSV is updated exactly once per day. There is no benefit to polling the files more frequently. To keep your local environment in sync without unnecessary overhead:</p>
+          <ul>
+            <li>Check <a target="_blank" rel="noopener noreferrer nofollow" href="last-updated.txt">last-updated.txt</a> first. This file contains a single timestamp of the most recent build.</li>
+            <li>Only trigger a full sync if the timestamp is newer than your last successful pull.</li>
+            <li>Limit your pulls to once every 24 hours.</li>
+          </ul>
+          <p>Please be a good neighbor. A full sync should require <b>at most 10,000 requests</b>. If your application is making more than this, please review your scraping logic for redundancies.</p>
+
+          <p>When scraping TCGCSV:</p>
+          <ul>
+            <li>Set a custom User-Agent header for all requests: <span class="mono">"User-Agent": "YourApplication/X.Y.Z"</span> (e.g. CatalogBuilder/1.2.0) Requests with generic or missing User-Agents may be blocked.</li>
+            <li>Include a <span class="mono">time.sleep(100ms)</span> in your update loop. If you exceed a reasonable request-per-second threshold, your IP will be temporarily throttled for 10 minutes.</li>
+            <li>Applications that make <b>more than 10,000 requests</b> in a 24 hour period may be banned</li>
+          </ul>
+          <p>TCGCSV is unfortunately configured with a restrictive CORS policy. Standard client-side (browser) fetch or XHR requests will fail. This data is intended to be pulled by back-end scripts or server-side applications. Please design your integration to ingest the data into your own database or cache rather than loading it directly from a user-facing web application.</p>
+
           <h3 id="TCGplayer">TCGplayer</h3>
           <p>The bulk of the information offered here from TCGplayer is a direct export from their API endpoints. When relevent, this documentation will link to the TCGplayer API endpoints that yielded the cached response.</p>
           <p><i>Almost</i> all endpoints from their API yield responses with the following format:</p>
