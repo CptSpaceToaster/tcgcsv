@@ -112,7 +112,7 @@ cat 2024-02-08/3/3170/prices</div></code></pre>
       <h3 id="missing-categories">What's with Categories 21, 69, and 70?</h3>
       <p>Category 21 is <i>My Little Pony</i>, but Category 28 is <i>My Little Pony CCG</i>. Category 21 does not have any groups and has been mostly removed from TCGplayer's side. You want Category 28 instead.</p>
       <p>Categories 69 and 70 indicate that TCGplayer attempted to categorize comic books at one point... and then stopped. Unlike category 21, these two categories have 1000's of groups available, however every group is empty (no products). These empty product-lists are <b>not</b> available to save on processing time.</p>
-      <p>For these reasons, I would strongly suggest skipping categories 21, 69, and 70 when processing all categories.</p>
+      <p>For these reasons, Please skip categories 21, <b>and all other empty categories [9, 10, 12, 14, 21, 55, 69, 70]</b> when processing.</p>
       <pre><code><div><b>import</b> requests
 <b>import</b> time
 
@@ -127,7 +127,7 @@ all_categories = r.json()[<span class="s">&#39;results&#39;</span>]
 
 <b>for</b> category <b>in</b> all_categories:
     category_id = category[<span class="s">&#39;categoryId&#39;</span>]
-    <b>if</b> category_id <b>in</b> [<span class="s">21</span>, <span class="s">69</span>, <span class="s">70</span>]:
+    <b>if</b> category_id <b>in</b> [<span class="s">9</span>, <span class="s">10</span>, <span class="s">12</span>, <span class="s">14</span>, <span class="s">21</span>, <span class="s">55</span>, <span class="s">69</span>, <span class="s">70</span>]:
         <b>continue</b>
 
     <span class="c"># Process the other categories normally</span>
