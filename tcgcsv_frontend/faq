@@ -43,7 +43,7 @@
       <p>See something wrong or out of place? Reach out on <a target="_blank" rel="noopener noreferrer nofollow" href="https://discord.gg/bydv2BNV25">discord</a> or submit an <a target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/CptSpaceToaster/tcgcsv/issues">issue on Github</a> to ask a question or offer a correction!</p>
 
       <h3 id="scraping">Can I scrape this website?</h3>
-      <p>If the premade CSVs aren't quite what you need then go ahead! It might make more sense to process the cached JSON files with any requests library directly.</p>
+      <p>If the premade CSVs aren't quite what you need then go ahead! It might make more sense to process the cached JSON files with any requests library directly. Please make sure to review the <a href="/docs#usage-guidelines">usage-guidelines</a> when doing so.</p>
       <pre><code><div><b>import</b> requests
 <b>import</b> time
 
@@ -103,6 +103,31 @@ cat 2024-02-08/3/3170/prices</div></code></pre>
       <p>Big thank-yous and shoutouts to <a target="_blank" rel="noopener noreferrer nofollow" href="https://twitter.com/hoodwill">Hoodwill</a> for sharing some of the data they've been recording!</p>
       <p class="z">If you, or someone you know or love has significant amounts of pricing history from before February 8, 2024 and they'd be comfortable giving it away freely please reach out!</p>
 
+      <h3 id="attribution">Are there any attribution rules or guidelines?</h3>
+      <p>Nope. A link thanking TCGCSV is always appreciated.</p>
+
+      <h3 id="permission">How do I get permission to use TCGCSV?</h3>
+      <p>You don't. Permission is implicit.</p>
+
+      <h3 id="external-copyright">How do I get permission from each card game to use their copyright/images?</h3>
+      <p>For the most part, you can't. Card game copyright is an extremely nebulous grey area. To summarize the guidelines here would be foolish. I will try anyways:
+        <ul>
+          <li>Don't be stupid</li>
+          <li>Check to see if a specific copyright holder has published their own <i>Terms of Use</i>.
+            <ul>
+              <li><a target="_blank" rel="noopener noreferrer nofollow" href="https://fabtcg.com/resources/terms-use-licensed-assets/">Flesh and Blood</a></li>
+              <li><a target="_blank" rel="noopener noreferrer nofollow" href="https://www.riotgames.com/en/legal">Riot Games</a></li>
+              <li>etc</li>
+            </ul>
+          </li>
+          <li>Don't make games or gameplay experiences using someone else's card images online. These cards are not yours. You should not make games with them. Pack opening simulators get shut down frequently, avoid making them. Don't use the card images to make your own game, don't charge money for "obtaining" digital cards, etc.</li>
+          <li>Marketplaces generally seem to be allowed to use the images for display/identification. Digital binder and deckbuilding tools generally seem to be allowed to use the images as well. This is a blatantly grey area and very few copyright holders clearly state their own rules.</li>
+          <li>You must tread carefully and reasonably, but doing so generally is welcome as long as the tools are benefiting the card game community. Self-serving digital products seeking to profiteer or needlessly seek rent from the community in any fashion are generally shutdown. The most I've seen folks get away with are digital binder applications with a free tier, and a pro tier. You must be very careful in this space if you are seeking to profit.</li>
+          <li>If you are merely making a free website to display information, I would not be worried unless it starts to trespass on the above guidelines.</li>
+        </ul>
+        I am not a lawyer. I am a fallible human being. These are the general patterns I think I've seen. Please take all advice with a grain of salt, and seek your own legal council should you require.
+      </p>
+
       <h3 id="contact-methods">What is the best way to contact someone about this website?</h3>
       <p>This website is just a hobby and a one-man show. The best place to reach the maintainer (CptSpaceToaster) is probably <a target="_blank" rel="noopener noreferrer nofollow" href="https://discord.gg/bydv2BNV25">discord</a>.</p>
 
@@ -132,7 +157,6 @@ all_categories = r.json()[<span class="s">&#39;results&#39;</span>]
 
     <span class="c"># Process the other categories normally</span>
     time.sleep(<span class="b">0.25</span>)</div></code></pre>
-
 
       <h3 id="price-parking">Why are some of the listed high prices absurd, unusually large, and "just bananas"?</h3>
       <p>A lot of sellers on TCGplayer engage in <b>Price Parking</b>: when a seller sets the price of a product to <i>thousands</i> of dollars so noone buys it. I don't know why sellers do this, but my guess is that a seller would want to park a card so they don't have to pick the card's set, printing, and condition if they want to list the card for sale again.</p>
